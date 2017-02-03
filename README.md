@@ -1,0 +1,3 @@
+# Eve Examples
+
+These examples will showcase the functionality of Eve and demonstrate some of the basic methods that could be used to build various practical applications. The intention is to build an intuition for how Eve works, and in the future combine the different smaller examples here into a larger example that more closely resembles the sort of app that a user might want to build to run website or business on.
