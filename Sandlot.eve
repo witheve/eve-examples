@@ -1,0 +1,90 @@
+# The Sandlot
+```css
+{}
+```
+
+```
+commit
+  [#player firstname:"Kenny" lastname:"DeNuñez" position:"P" bats:"R" lineup:1]
+  [#player firstname:"Hamilton" lastname:"Porter" position:"C" bats:"R" lineup:2]
+  [#player firstname:"Timmy" lastname:"Timmons" position:"1B" bats:"R" lineup:3]
+  [#player firstname:"Bertram" lastname:"Grover Weeks" position:"2B" bats:"R" lineup:4]
+  [#player firstname:"Alan" lastname:"McClennan" position:"3B" bats:"R" lineup:5]
+  [#player firstname:"Benny" lastname:"Rodriguez" position:"SS" bats:"S" lineup:6]
+  [#player firstname:"Scott" lastname:"Smalls" position:"LF" bats:"R" lineup:7]
+  [#player firstname:"Michael" lastname:"Palledorous" position:"CF" bats:"R" lineup:8]
+  [#player firstname:"Tommy" lastname:"Timmons" position:"RF" bats:"R" lineup:9]
+  [#player firstname:"Thelonius" lastname:"Mertle" position:"2B" bats:"L" backup:1]
+  [#player firstname:"George" lastname:"Ruth" position:"P" bats:"L" backup:2]
+  [#player firstname:"Hercules" lastname:"Mertle" position:"C" bats:"S" backup:3]
+  [#player #IR firstname:"" lastname:"Phillips" position:"SS" bats:"R"]
+```
+
+```
+commit @browser
+  [#div class:"container" children:
+   [#active class:"active"]
+   [#inactive class:"inactive"]]
+```
+
+```
+search @session @browser
+  player = [#player firstname lastname position bats lineup]
+  active = [#active]
+
+bind @browser
+  active <- [#div class:"lineup" text:"Batting Order" children:
+    [#div player sort:lineup class:"lineup-position" children:
+      [#div class:"bat-number" text:lineup]
+      [#div class:"player-card" text:"{{firstname}} {{lastname}}"]
+    ]
+  ]
+```
+
+```
+search @session @browser
+  player = [#player firstname lastname position bats backup]
+  inactive = [#inactive]
+
+bind @browser
+  inactive <- [#div class:"lineup" text:"Bench" children:
+    [#div player sort:backup class:"lineup-position" children:
+      [#div class:"bat-number" text:backup]
+      [#div class:"player-card" text:"{{firstname}} {{lastname}}"]
+    ]
+  ]
+
+```
+
+```css
+.container  {
+  display: flex;
+  flex-direction: row;
+}
+
+.lineup {
+  display: flex;
+  flex-direction: column;
+}
+
+.lineup-position {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+}
+
+.player-card {
+  margin: 0px 0px;
+  height: 85px;
+  width: 300px;
+  background: #ffffff;
+  border: 1px solid black;
+  border-radius: 8px;
+  order: 2;
+}
+
+.bat-number {
+  order: 1;
+}
+
+```
