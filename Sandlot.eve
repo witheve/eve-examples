@@ -126,8 +126,7 @@ commit
 If a player is #`moveable`, it means they're in the active lineup and should be able to be removed from the active lineup and sent to the bench. This simply looks for any #`moveable` players and adds a #`deactivate` button to them.
 ```
 search @browser @session
-  container = [#div #moveable player]
-  
+  container = [#div #moveable player]  
 
 bind @browser
   container.children += [#div #deactivate player class:"ion-log-out"]
