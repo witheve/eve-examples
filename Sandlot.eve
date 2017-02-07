@@ -12,9 +12,9 @@ I want to break the page down into three columns: one for the active lineup, one
 ```
 commit @browser
   [#div class:"container" children:
-    [#active class:"active"]
-    [#inactive class:"inactive"]
-    [#IR class:"IR"]]
+    [#div #active class:"lineup" text:"Batting Order"]
+    [#div #inactive class:"lineup" text:"Bench"]
+    [#div #IR class:"lineup" text:"Injured Reserve"]]
 ```
 
 ### Active Lineup
@@ -25,7 +25,7 @@ search @session @browser
   active = [#active]
 
 bind @browser
-  active <- [#div #lineup class:"lineup" text:"Batting Order" children: [#player-card #moveable sort:lineup player]]
+  active.children += [#div #lineup children: [#player-card #moveable sort:lineup player]]
 ```
 
 ### Bench Players
@@ -38,7 +38,7 @@ search @session @browser
 
 bind @session @browser
   player.lineup := n
-  inactive <- [#div #lineup class:"lineup" text:"Bench" children: [#player-card #benched sort:n player]]
+  inactive.children += [#div #lineup children: [#player-card #benched sort:n player]]
 ```
 
 ### Injured Reserve
@@ -51,7 +51,7 @@ search @session @browser
 
 bind @session @browser
   player.lineup := n
-  IR <- [#div #lineup class:"lineup" text:"Injured Reserve" children: [#player-card sort:n player]]
+  IR.children += [#div #lineup children: [#player-card sort:n player]]
 ```
 
 ## Player Cards
@@ -127,6 +127,7 @@ If a player is #`moveable`, it means they're in the active lineup and should be 
 ```
 search @browser @session
   container = [#div #moveable player]
+  
 
 bind @browser
   container.children += [#div #deactivate player class:"ion-log-out"]
@@ -137,7 +138,6 @@ This gives #`deactivate` its behavior. The `clicked-player` is sent to the bench
 search @browser @event @session
   [#click element:[#deactivate player:clicked-player]]
   players-below = [#player lineup > clicked-player.lineup]
-
 
 commit
   clicked-player += #bench
@@ -160,7 +160,8 @@ This adds an #`activate` button to the bench players so we can add them to the a
 ```
 search @browser @session
   container = [#div #benched player]
-  not(count[given:[#player not(#bench) not(#injured)]]:9)
+  active-players = if c = count[given:[#player not(#bench) not(#injured)]] then c else 0
+  active-players != 9
 
 bind @browser
   container.children += [#div #activate player class:"ion-log-in"]
@@ -170,8 +171,8 @@ This gives #`activate` its behavior. When an #`activate` button is clicked, Eve 
 ```
 search @browser @event @session
   [#click element:[#activate player:clicked-player]]
-  active-players = count[given:[#player not(#bench) not(#injured)]]
-  not(active-players:9)
+  active-players = if c = count[given:[#player not(#bench) not(#injured)]] then c else 0
+  active-players != 9
 
 commit
   clicked-player -= #bench
@@ -204,6 +205,9 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
   display: flex;
   flex-direction: row;
   user-select: none;
+  font-size: 20px;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .lineup {
@@ -214,6 +218,8 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
   text-align: center;
   margin-right: 50px;
   position: relative;
+  flex: 1 0 auto;
+  min-width: 465px;
 }
 
 .lineup-position {
