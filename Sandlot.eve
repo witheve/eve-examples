@@ -184,7 +184,7 @@ commit
 Our sample roster data.
 ```
 commit
-  [#player firstname:"Kenny" lastname:"DeNuñez" position:"P" bats:"R" lineup:1 photo:"http://i.imgur.com/kaRnA7R.png"]
+  [#player firstname:"Kenny" lastname:"DeNunez" position:"P" bats:"R" lineup:1 photo:"http://i.imgur.com/kaRnA7R.png"]
   [#player firstname:"Hamilton" lastname:"Porter" nickname:"Ham" position:"C" bats:"R" lineup:2 photo:"http://i.imgur.com/7C678n2.jpg"]
   [#player firstname:"Timmy" lastname:"Timmons" position:"IF" bats:"R" lineup:3 photo:"http://i.imgur.com/JLHupGR.png"]
   [#player firstname:"Bertram" lastname:"Grover Weeks" position:"IF" bats:"R" lineup:4 photo:"http://i.imgur.com/mfIMIy6.png"]
