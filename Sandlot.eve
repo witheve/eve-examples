@@ -13,15 +13,15 @@ I want to break the page down into three columns: one for the active lineup, one
 commit @browser
   [#div class:"container" children:
     [#div #active class:"lineup" text:"Batting Order"]
-    [#div #inactive class:"lineup" text:"Bench"]
-    [#div #IR class:"lineup" text:"Injured Reserve"]]
+    [#div #inactive class:"lineup" text:"Bench"]]
+  [#div #IR class:"lineup IR" text:"Injured Reserve"]
 ```
 
 ### Active Lineup
 The first column drawn should be the active batting order. While I could have specified all the text and contents of each player in this block, note that I used two tags, #`player-card` and #`moveable`, whose contents and behavior get defined later. Since every player listed is going to have the same information, #`player-card` lets me drop the tag in and define all the html and content later, which is done in the Player Cards section after this one.
 ```
 search @session @browser
-  player = [#player not(#bench) not(#injured) firstname lastname position bats lineup]
+  player = [#player not(#bench) not(#injured) firstname lastname position bats lineup photo]
   active = [#active]
 
 bind @browser
@@ -32,7 +32,7 @@ bind @browser
 These are the bench players. Note that #`player-card` is used again, saving me the work of having to define all the same html and content that's used in the active lineup. The big difference here is the ordering of the players. Whereas the players in the lineup have a deliberate and specific order (which makes sense for things like a batting order), I don't need a specific order for the bench players. I do, however, want to know how many there are and make sure they render in the same order each time, so I sort by the `player` variable to get an index, `n`. Each player gets assigned an index, which is how I sort the bench players, and also set `player.lineup` to that index so they get numbered 1, 2, 3, and so on.
 ```
 search @session @browser
-  player = [#player #bench firstname lastname position bats lineup]
+  player = [#player #bench firstname lastname position bats lineup photo]
   inactive = [#inactive]
   n = sort[value:player]
 
@@ -45,7 +45,7 @@ bind @session @browser
 These are the injured reserve players. This section is functionally identical to the bench player section, except it gets merged into the #`IR` section on the page. There's only one player on the IR and no functionality exists to move him elsewhere, because he is a jerk.
 ```
 search @session @browser
-  player = [#player #injured not(#bench) firstname lastname position bats lineup]
+  player = [#player #injured not(#bench) firstname lastname position bats lineup photo]
   IR = [#IR]
   n = sort[value:player]
 
@@ -59,7 +59,7 @@ This is where the magic happens. Every time this finds #`player-card` in the bro
 ```
 search @browser @session
   container = [#player-card player]
-  player = [#player firstname lastname position bats lineup]
+  player = [#player firstname lastname position bats lineup photo]
   middle = if player.nickname then " \"{{player.nickname}}\" "
              else " "
 
@@ -67,12 +67,14 @@ bind @browser
   container <- [#div player class:"lineup-position" children:
     [#div class:"bat-number" text:lineup]
     [#div class:"player-info" children:
-      [#div class:"name-line" children:
-        [#div class:"position" text:position]
-        [#div class:"first-name" text:firstname]
-        [#div class:"middle-name" text:middle]
-        [#div class:"last-name" text:lastname]]
-      [#div class:"bat-hand" text:"Bats: {{bats}}"]
+      [#img class:"player-photo" src:photo]
+      [#div class:"player-text" children:
+        [#div class:"name-line" children:
+          [#div class:"position" text:position]
+          [#div class:"first-name" text:firstname]
+          [#div class:"middle-name" text:middle]
+          [#div class:"last-name" text:lastname]]
+        [#div class:"bat-hand" text:"Bats: {{bats}}"]]
     ]
   ]
 ```
@@ -182,19 +184,19 @@ commit
 Our sample roster data.
 ```
 commit
-  [#player firstname:"Kenny" lastname:"DeNuñez" position:"P" bats:"R" lineup:1]
-  [#player firstname:"Hamilton" lastname:"Porter" nickname:"Ham" position:"C" bats:"R" lineup:2]
-  [#player firstname:"Timmy" lastname:"Timmons" position:"IF" bats:"R" lineup:3]
-  [#player firstname:"Bertram" lastname:"Grover Weeks" position:"IF" bats:"R" lineup:4]
-  [#player firstname:"Alan" lastname:"McClennan" nickname:"Yeah-Yeah" position:"IF" bats:"R" lineup:5]
-  [#player firstname:"Benny" lastname:"Rodriguez" nickname:"The Jet" position:"IF" bats:"S" lineup:6]
-  [#player firstname:"Scott" lastname:"Smalls" position:"OF" bats:"R" lineup:7]
-  [#player firstname:"Michael" lastname:"Palledorous" nickname:"Squints" position:"OF" bats:"R" lineup:8]
-  [#player firstname:"Tommy" lastname:"Timmons" nickname:"Repeat" position:"OF" bats:"R" lineup:9]
-  [#player #bench firstname:"Thelonius" lastname:"Mertle" position:"IF" bats:"L" lineup:""]
-  [#player #bench firstname:"George" lastname:"Ruth" nickname:"Babe" position:"P" bats:"L" lineup:""]
-  [#player #bench firstname:"Hercules" lastname:"Mertle" nickname:"The Beast" position:"PR" bats:"S" lineup:""]
-  [#player #injured firstname:"" lastname:"Phillips" position:"IF" bats:"R" lineup:""]
+  [#player firstname:"Kenny" lastname:"DeNuñez" position:"P" bats:"R" lineup:1 photo:"http://i.imgur.com/kaRnA7R.png"]
+  [#player firstname:"Hamilton" lastname:"Porter" nickname:"Ham" position:"C" bats:"R" lineup:2 photo:"http://i.imgur.com/7C678n2.jpg"]
+  [#player firstname:"Timmy" lastname:"Timmons" position:"IF" bats:"R" lineup:3 photo:"http://i.imgur.com/JLHupGR.png"]
+  [#player firstname:"Bertram" lastname:"Grover Weeks" position:"IF" bats:"R" lineup:4 photo:"http://i.imgur.com/mfIMIy6.png"]
+  [#player firstname:"Alan" lastname:"McClennan" nickname:"Yeah-Yeah" position:"IF" bats:"R" lineup:5 photo:"http://i.imgur.com/ZyLzCDn.jpg"]
+  [#player firstname:"Benny" lastname:"Rodriguez" nickname:"The Jet" position:"IF" bats:"S" lineup:6 photo:"http://i.imgur.com/UOywuNz.jpg"]
+  [#player firstname:"Scott" lastname:"Smalls" position:"OF" bats:"R" lineup:7 photo:"http://i.imgur.com/eBZ2m17.jpg"]
+  [#player firstname:"Michael" lastname:"Palledorous" nickname:"Squints" position:"OF" bats:"R" lineup:8 photo:"http://i.imgur.com/q8KKRz6.jpg"]
+  [#player firstname:"Tommy" lastname:"Timmons" nickname:"Repeat" position:"OF" bats:"R" lineup:9 photo:"http://i.imgur.com/QPzSCGy.png"]
+  [#player #bench firstname:"Thelonius" lastname:"Mertle" position:"IF" bats:"L" lineup:"" photo:"http://i.imgur.com/XDA0ftH.jpg"]
+  [#player #bench firstname:"George Herman" lastname:"Ruth" nickname:"Babe" position:"P" bats:"L" lineup:"" photo:"http://i.imgur.com/kep7Unm.jpg"]
+  [#player #bench firstname:"Hercules" lastname:"Mertle" nickname:"The Beast" position:"PR" bats:"S" lineup:"" photo:"http://i.imgur.com/WOwMn5c.jpg"]
+  [#player #injured firstname:"" lastname:"Phillips" position:"IF" bats:"R" lineup:"" photo:"http://i.imgur.com/Qvxya5C.jpg"]
 ```
 
 ## Styles
@@ -207,6 +209,15 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
   font-size: 20px;
   text-transform: uppercase;
   text-align: center;
+  overflow: scroll;
+  height: 1000px;
+  border-bottom: 1px solid #555;
+  margin-bottom: 
+}
+
+.IR {
+  width: 515px;
+  margin-top: 60px;
 }
 
 .lineup {
@@ -217,8 +228,10 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
   text-align: center;
   margin-right: 50px;
   position: relative;
-  flex: 1 0 auto;
-  min-width: 465px;
+  flex: 1 0 515;
+  width: 515px;
+  min-width: 515px;
+  overflow: scroll;
 }
 
 .lineup-position {
@@ -241,13 +254,13 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
 
 .player-info {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   margin: 0px 0px;
-  padding: 0px 0px 0px 10px;
+  padding: 0px 0px 0px 0px;
   height: 85px;
-  width: 400px;
+  width: 450px;
   background: #ffffff;
-  border: 1px solid black;
+  border: 1px solid #555;
   border-radius: 8px;
   order: 2;
   overflow: hidden;
@@ -256,7 +269,7 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
 .name-line {
   display: flex;
   flex-direction: row;
-  margin: 10px 0px;
+  margin: 5px 10px;
 }
 
 .position {
@@ -288,10 +301,16 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
 
 }
 
+.player-photo {
+  height: 85px;
+  width: 85px;
+}
+
 .bat-hand {
   font-size: 14px;
   height: 14px;
   text-align: left;
+  margin: 10px;
 }
 
 .ion-chevron-up {
