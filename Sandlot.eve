@@ -269,7 +269,7 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
 .name-line {
   display: flex;
   flex-direction: row;
-  margin: 5px 10px;
+  margin: 10px 10px;
 }
 
 .position {
@@ -304,6 +304,7 @@ The app needs a good bit of CSS to clean up the three page sections, stylize the
 .player-photo {
   height: 85px;
   width: 85px;
+  border-right: 1px solid #555;
 }
 
 .bat-hand {
