@@ -8,7 +8,7 @@ This baseball batting order app is in honor of @baseballfan69 and demonstrates r
 
 ## Page Layout
 ### Containers
-I want to break the page down into three columns: one for the active lineup, one for the bench players, and one for players on injured reserve.
+I want to break the page down into a couple sections: one for the active lineup and the bench players, and one for players on injured reserve.
 ```
 commit @browser
   [#div class:"container" children:
@@ -55,7 +55,7 @@ bind @session @browser
 ```
 
 ## Player Cards
-This is where the magic happens. Every time this finds #`player-card` in the browser, it will make a #`div` for each player and spit out a player card. It checks to see if the player has a nickname as well, and just leaves a space between the first and last names if there isn't. It's worth mentioning that because I want this to be as general a template as possible, a handful of architectural decisions were made to facilitate that. In each of the three page layout columns, I restrict the search parameters there to only ask for players that would be in each section. In the Roster Data, all the players have a `lineup` attribute even though the bench and IR players have an empty string as the value. If you're good at predicting which reusable parts you'll need, you can implement these sorts of things from the outset, or you can figure out where they need to be as you go along and refactor them into your code as you work.
+This is where the magic happens. Every time this finds #`player-card` in the browser, it will make a #`div` for each player and spit out a player card. It checks to see if the player has a nickname as well, and just leaves a space between the first and last names if there isn't. It's worth mentioning that because I want this to be as general a template as possible, a handful of architectural decisions were made to facilitate that. In the sections that draw each of the three lists, I use the search parameters there to select the specific players I want and inject those player cards. In the Roster Data, all the players have a `lineup` attribute even though the bench and IR players have an empty string as the value. If you're good at predicting which reusable parts you'll need, you can implement these sorts of things from the outset, or you can figure out where they need to be as you go along and refactor them into your code as you work.
 ```
 search @browser @session
   container = [#player-card player]
@@ -200,7 +200,7 @@ commit
 ```
 
 ## Styles
-The app needs a good bit of CSS to clean up the three page sections, stylize the player cards, and organize the various buttons.
+The app needs a good bit of CSS to organize the page sections ad various buttons as well as stylize the player cards.
 ```css
 .container  {
   display: flex;
