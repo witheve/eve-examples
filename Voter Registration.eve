@@ -1,0 +1,212 @@
+# New New York Voting Registration
+```css
+{}
+```
+
+## Nav Panel
+```
+commit @browser
+  [#div class:"nav-bar"]
+  [#div class:"app-window"]
+
+
+```
+
+```
+commit
+  [#page target:"Register"]
+  [#page target:"Summary"]
+```
+
+```
+search @session @browser
+  nav-bar = [#div class:"nav-bar"]
+  [#page target]
+
+bind @browser
+  nav-bar <- [children: [#div #btn target text:target]]
+
+```
+
+```
+search @session @browser @event
+  [#click element: [#btn target]]
+  window = [#app-window]
+
+commit
+  window.target := target
+```
+
+```
+commit
+  [#app-window target:"Register"]
+
+```
+
+
+## Voter Registration Page
+
+```
+search @session @browser
+  [#app-window target:"Register"]
+  window = [#div class:"app-window"]
+  [#party party-name priority]
+
+bind @browser
+  window.class += "voter-registration"
+  window <- [children:
+
+    [#div class:"qualifications" text:"Qualifications" children:
+      [#div text:"Are you a citizen of Planet Earth?" children:
+        [#div text:"Yes:"]
+        [#input type:"radio" name:"cit?" value:"cityes"]
+        [#div text:"No:"]
+        [#input type:"radio" name:"cit?" value:"citno"]
+      ]
+      [#div text:"Will you be 18 years of age or older on or before election day?" children:
+        [#div text:"Yes:"]
+        [#input type:"radio" name:"age?" value:"ageyes"]
+        [#div text:"No:"]
+        [#input type:"radio" name:"age?" value:"ageno"]
+      ]
+    ]
+
+    [#div class:"your-name" text:"Your name" children:
+      [#field id:"First name"]
+      [#field id:"Last name"]
+      [#field id:"Suffix"]
+      [#field id:"Middle Initial"]
+    ]
+
+    [#div class:"personal-info" text:"More information" children:
+      [#field id:"Birthday"]
+      [#field id:"Sex"]
+      [#field id:"Phone Number"]
+      [#field id:"Email"]
+    ]
+
+    [#div class:"voter-address" text:"The address where you live" children:
+      [#field id:"Address"]
+      [#field id:"Apt. Number"]
+      [#field id:"City/Town/Village" value:"New New York"]
+      [#field id:"Zip Code"]
+    ]
+
+    [#div class:"identification" text:"Identification" children:
+      [#field id:"New New York DMV Number"]
+      [#field id:"Last four digits of your Social Security number"]
+    ]
+
+    [#div class:"political-party" text:"Political Party" children:
+      [#div sort:priority party-name children:
+        [#div text:party-name]
+        [#input type:"radio" name:"party-radio" party-name]
+      ]
+    ]
+
+    [#button #submit text:"submit"]
+]
+
+
+
+
+```
+
+```
+search @browser
+  field = [#field id]
+
+bind @browser
+  field += #div
+  field.children += 
+    [#div text:id children:
+    [#input id]]
+  
+
+```
+
+```
+search @browser @event
+  old = [#input type:"checkbox" checked:true]
+  [#click element:[#div]]
+  
+commit @browser
+  old.checked := none
+```
+
+```
+commit
+  [#party party-name:"Tastycrat Party" priority:1]
+  [#party party-name:"Fingerlican Party" priority:2]
+  [#party party-name:"One Cell, One Vote" priority:3]
+  [#party party-name:"Green Party" priority:4]
+  [#party party-name:"Brain Slug Party" priority:5]
+  [#party party-name:"Dudes for the Legalization of Hemp" priority:6]
+  [#party party-name:"Bull Space Moose Party" priority:7]
+  [#party party-name:"National Ray-Gun Association" priority:8]
+  [#party party-name:"People for the Ethical Treatment of Humans" priority:9]
+  [#party party-name:"Voter Apathy Party" priority:10]
+  [#party party-name:"Rainbow Whigs" priority:11]
+  [#party party-name:"Antisocialists" priority:12]
+  [#party party-name:"Reform Party" priority:13]
+
+```
+
+```eve
+search @session @browser @event
+  [#click element: [#submit]]
+  form = [#input id value]
+  answer = value
+
+commit
+  [#data id answer]
+
+```
+
+```eve
+search @session @browser @event
+[#click element: [#submit]]
+  form = [#input type:"radio" name value checked:true]
+
+commit
+  [#data id:value answer:form.checked]
+
+```
+
+```
+search @session @browser
+  form = [#input type:"radio" name value checked:true]
+  nav-bar = [#div class:"nav-bar"]
+  
+bind
+  [#page target:"{{value}} is true"]
+```
+
+```
+search @session @browser
+  [#app-window target:"Summary"]
+  window = [#div class:"app-window"]
+  [#data id answer]
+
+bind @browser
+  window <- [children:[#div id text:"{{id}}: {{answer}}"]]
+```
+
+
+## Styles
+Stylez
+```css
+.nav-bar {
+  background: white;
+  order: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.app-window {
+  background: white;
+  order: 2;
+  display: flex;
+  flex-direction: column;
+}
+```
