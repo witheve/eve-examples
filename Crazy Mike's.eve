@@ -6,8 +6,8 @@
 ## What is this?
 This small app is pretty straightforward, consisting of a simple webpage with four subpages. The purpose is to demonstrate some basic webpage structure, show how a navigation bar could be implemented, how it changes the view between the different subpages, and how to inject page contents into the page view as you navigate from one subpage to another.
 
-## Page Template
-### Basic Page View
+## Page Layout
+### Containers
 Since I want this app to have a constant hero image and nav bar above the page, that means the nav bar and image are going to be static while the page contents are going to change.
 
 ```
