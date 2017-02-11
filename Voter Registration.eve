@@ -1,7 +1,10 @@
 # New New York Voting Registration
 ```css
-{}
+{for a good time, leave this here}
 ```
+
+## What is this?
+This example demonstrates how to capture input from forms and create and explore records from that. It should also provide a look at some of the particular complications and pitfalls in dealing with forms. In the future it'll most likely be useful to address a more complicated version of forms, but for now this is a good starting point to develop an intuition of the concepts. If anything seems oversimplified or susceptible to edge cases and user error, it's most likely from the effort to avoid bugs and overly complicated layouts.
 
 ## Page Layout
 ### Containers
@@ -254,6 +257,7 @@ bind @browser
 ```
 
 ## Sample Data
+Here's a few registered voters to help populate the Summary page.
 ```eve
 commit
   [#voter voter-id:7362 children:
