@@ -1,0 +1,454 @@
+# New New York Voting Registration
+```css
+{for a good time, leave this here}
+```
+
+## What is this?
+This example demonstrates how to capture input from forms and create and explore records from that. It should also provide a look at some of the particular complications and pitfalls in dealing with forms. In the future it'll most likely be useful to address a more complicated version of forms, but for now this is a good starting point to develop an intuition of the concepts. If anything seems oversimplified or susceptible to edge cases and user error, it's most likely from the effort to avoid bugs and overly complicated layouts.
+
+## Page Layout
+### Containers
+This one's pretty simple; I want a nav bar at the top to let me manually go to the different pages, and an app window where those pages are rendered.
+
+```
+commit @browser
+  [#div class:"nav-bar"]
+  [#div class:"app-window"]
+```
+
+### Pages
+For every page I want, I make a record with an attribute of `target` to specify which each page is called.
+
+```
+commit
+  [#page target:"Start"]
+  [#page target:"Register"]
+  [#page target:"Summary"]
+```
+
+### Nav Bar Buttons
+By abstracting this step out, I can define all the pages I want as in the block before, and then here find those pages and create a button on the nav bar for each of them.
+
+```
+search @session @browser
+  nav-bar = [#div class:"nav-bar"]
+  [#page target]
+
+bind @browser
+  nav-bar <- [children: [#button target text:target]]
+```
+This partner block works with the nav buttons by simply setting the app window to whichever nav button is clicked.
+
+```
+search @session @browser @event
+  [#click element: [#button target]]
+  window = [#app-window]
+
+commit
+  window.target := target
+```
+
+### Starting Page
+This commits a record called #`app-window` whose attribute `target` specifies which page gets rendered. In this case, when the app starts up, I want the landing view to be the Start page.
+
+```
+commit
+  [#app-window target:"Start"]
+
+```
+## Start Page
+The starting page isn't very complicated - it contains a thank you message for the civically engaged Earthicans, the always-inspiring banner of Earth, Old Freebie, and a button to start a new registration for another voter.
+
+```
+search @session @browser
+  [#app-window target:"Start"]
+  window = [#div class:"app-window"]
+
+bind @browser
+  window.class += "home-screen"
+  window <- [children:
+    [#div class:"thank-you" text:"Thank you for registering to vote!"]
+    [#img class:"old-freebie" src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Futurama_flag_of_Earth.svg/720px-Futurama_flag_of_Earth.svg.png"]
+    [#button target:"Register" class:"begin-btn" text:"Begin a new registration"]
+  ]
+```
+
+## Voter Registration Page
+Holy text wall Batman. So it turns out the voter registration page is a little verbose, far more than most of what I write in Eve. This one was tricky because even with a pretty minimal number of questions, the layout quickly became complicated, no to mention capturing and organizing all the data to be committed. As many reusable parts were used as possible, with #`qualify-test` designating yes/no questions that determine your eligibility to vote, #`field` designating standard text input questions, and `radio` input buttons designating the "pick one" questions. The first two get both their content and shape specified in subsequent blocks, and the last has its general shape defined here with subsequent blocks to populate those lists. It's tough to homogenize something like this, especially with all the one-offs. Some of the forms need a character limit, like phone number or birthday. The radio buttons for the political parties needed a special button at the end to choose if you have no political affiliation, and radio buttons in general differ from the other #`input` blocks in terms of their namespace.
+
+```
+search @session @browser
+  [#app-window target:"Register"]
+  window = [#div class:"app-window"]
+  [#party party-name priority]
+  [#gender gender-name order]
+
+bind @browser
+  window.class += "voter-registration"
+  window <- [children:
+
+    [#div class:"qualifications" text:"Qualifications" children:
+      [#div #qualify-test name:"citizen" text:"Are you a citizen of Planet Earth?"]
+      [#div #qualify-test name:"felon" text:"Are you a convicted felon?"]
+    ]
+
+    [#div class:"your-name" text:"Your name" children:
+      [#field question:"Name"]
+    ]
+
+    [#div class:"personal-info" text:"More information" children:
+      [#field class:"birth-field" length:10 question:"Birthday" placeholder:"MM-DD-YYYY"]
+      [#div text:"Sex" children:
+        [#div gender-name sort:order children:
+          [#div text:gender-name]
+          [#input type:"radio" name:"Sex" value:gender-name]
+        ]
+      ]
+      [#field class:"phone-field" length:12 question:"Phone Number" placeholder:"XXX-XXX-XXXX"]
+    ]
+
+    [#div class:"voter-address" text:"The address where you live" children:
+      [#field class:"address-field" question:"Address" placeholder:"Street Address, Apt. Number (if applicable), City/Town/Village Zip Code"]
+    ]
+
+    [#div class:"identification" text:"Identification" children:
+      [#field class:"ssn-field" length:4 question:"Last four digits of your Social Security number"]
+    ]
+
+    [#div class:"political-party" text:"Political Party" children:
+      [#div sort:priority party-name children:
+        [#div text:party-name]
+        [#input type:"radio" name:"Party" value:party-name]
+      ]
+      [#div sort:100 children:
+        [#div text:"I do not wish to enroll in a party"]
+        [#input #no-party type:"radio" name:"Party" value:"No party"]
+      ]
+    ]
+
+    [#button #submit target:"Start" text:"Submit"]
+]
+```
+
+### Binary Radio Buttons
+The qualification questions (in the current case, citizenship and criminal status) that appear in the registration form are tagged #`qualify-test` and need text to say Yes and No with radio buttons next to each.
+
+```
+search @browser
+  test = [#qualify-test name]
+
+bind @browser
+  test <- [children:
+    [#div text:"Yes:" children:
+      [#input type:"radio" name value:"yes"]]
+    [#div text:"No:" children:
+        [#input type:"radio" name value:"no"]]
+   ]
+
+```
+### Text Input Fields
+The questions that require an unadorned #`input` form are tagged as #`field` and get handled here. This finds those records and injects the content into the browser, preserving the `placeholder`, `class`, and `maxlength` properties and passing them on to their appropriate elements.
+
+```
+search @browser
+  field = [#field question]
+  placeholder-text = if field.placeholder then field.placeholder
+                     else ""
+  field-class = if field.class then field.class
+                else "regular-field"
+  maxlength = if field.length then field.length
+              else ""
+
+bind @browser
+  field += #div
+  field.children +=
+    [#div text:question children:
+    [#input class:field-class maxlength question placeholder:placeholder-text]]
+```
+
+### Gender Options
+Technically this question susses out both one's gender and organic life versus robot status, and the end result is the need for a list of genders rather than a binary option. Instead of adding these manually in the voter registration page layout, I've made a list here, open to any additional genders that need to be added. Any gender on this list will get added to the voter registration page, which gets sorted by the `order` attribute.
+
+```
+commit
+  [#gender gender-name:"Male" order:1]
+  [#gender gender-name:"Female" order:2]
+  [#gender gender-name:"Manbot" order:3]
+  [#gender gender-name:"Fembot" order:4]
+```
+
+### Political Party Options
+While the Tastycrats and Fingerlicans are the primary parties, there are many third parties to choose from, and they all get listed here. Again, this makes it easy to add or remove political parties without having to mess around with the voter registration page.
+
+```
+commit
+  [#party party-name:"Tastycrat Party" priority:1]
+  [#party party-name:"Fingerlican Party" priority:2]
+  [#party party-name:"One Cell, One Vote" priority:3]
+  [#party party-name:"Green Party" priority:4]
+  [#party party-name:"Brain Slug Party" priority:5]
+  [#party party-name:"Dudes for the Legalization of Hemp" priority:6]
+  [#party party-name:"Bull Space Moose Party" priority:7]
+  [#party party-name:"National Ray-Gun Association" priority:8]
+  [#party party-name:"People for the Ethical Treatment of Humans" priority:9]
+  [#party party-name:"Voter Apathy Party" priority:10]
+  [#party party-name:"Rainbow Whigs" priority:11]
+  [#party party-name:"Antisocialists" priority:12]
+  [#party party-name:"Reform Party" priority:13]
+```
+
+### Committing a New Voter Record
+This listens for a click event on the #`submit` button and then creates a new #`voter` record with the information contained in the registration form. Since every #`input` field has a `question` attribute by default, I search for that, but for the corresponding answer set to `form-value`, I check to see if there's even anything typed into that field. If there is then that answer gets committed, but otherwise an empty string is stored. Radio buttons are also specifically asked for because their namespaces are a little different. All of the questions and answers get committed to a new #`voter` record, which is also assigned a unique attribute in `voter-id` to guarantee unique records (which is important to make sure each registration page submission generates its own unique voter).
+
+```eve
+search @session @browser @event
+  [#click element: [#submit]]
+  form = [#input question]
+  form-value = if form.value then form.value else ""
+  radio = [#input type:"radio" name value checked:true]
+  window = [#app-window]
+  id = if c = count[given:[#voter]] then c + 1 else 1
+
+commit
+  [#voter voter-id:id children: [#data question:form.question answer:form-value] [#data question:radio.name answer:radio.value]]
+```
+
+## Summary Page
+This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a #`voter-card` for each #`voter` record. The layout for what the #`voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
+
+```eve
+search @session @browser
+  [#app-window target:"Summary"]
+  window = [#div class:"app-window"]
+  voter = [#voter voter-id children: [#data question answer]]
+
+bind @browser
+  window.children += [#voter-card voter]
+```
+
+### Voter Cards
+Each voter gets a #`voter-card` in the browser, and this block inject that with all of its content. It's worth noting again how verbose this section is, since each question on the registration form requires its own line in the search block. Originally I had intended to capture first name, middle name, and last name separately, as well as the street number, city, and zip code for address, but all of those different fields added up quickly and I was staring down the barrel of a 20-line search block. There are more complicated methods to deal with complex situations like that, and we'll have another example to show off functionality (perhaps an expanded version of this app), but for now, long-winded specificity is the cleanest way to achieve the goals of this example.
+
+```
+search @session @browser
+  voter-card = [#voter-card voter]
+  voter = [#voter voter-id children:[#data question:"citizen" answer:is-citizen]]
+  voter = [#voter voter-id children:[#data question:"felon" answer:is-felon]]
+  voter = [#voter voter-id children:[#data question:"Name" answer:voter-name]]
+  voter = [#voter voter-id children:[#data question:"Birthday" answer:voter-birth]]
+  voter = [#voter voter-id children:[#data question:"Sex" answer:voter-sex]]
+  voter = [#voter voter-id children:[#data question:"Phone Number" answer:voter-phone]]
+  voter = [#voter voter-id children:[#data question:"Address" answer:voter-address]]
+  voter = [#voter voter-id children:[#data question:"Last four digits of your Social Security number" answer:voter-ssn]]
+  voter = [#voter voter-id children:[#data question:"Party" answer:voter-party]]
+
+bind @browser
+  voter-card <- [#div class:"voter-card" children:
+    [#div class:"voter-name" text:voter-name]
+    [#div class:"voter-address" text:voter-address]
+    [#div class:"birth-info" children:
+      [#div class:"voter-birth" text:"Born: {{voter-birth}}"]
+      [#div class:"voter-sex" text:"Gender: {{voter-sex}}"]
+      [#div class:"voter-ssn" text:"SSN: XXX-XX-{{voter-ssn}}"]
+    ]
+    [#div class:"voter-phone" text:"Phone: {{voter-phone}}"]
+    [#div class:"voter-party" text:"Affiliation: {{voter-party}}"]
+  ]
+```
+
+## Sample Data
+Here's a few registered voters to help populate the Summary page.
+```eve
+commit
+  [#voter voter-id:7362 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"Philip J. Fry"]
+    [#data question:"Birthday" answer:"08-14-1974"]
+    [#data question:"Sex" answer:"Male"]
+    [#data question:"Phone Number" answer:""]
+    [#data question:"Address" answer:"620 W 42nd St, Apt 00100100, New New York, NY 10036"]
+    [#data question:"Last four digits of your Social Security number" answer:"0810"]
+    [#data question:"Party" answer:"Voter Apathy Party"]
+  ]
+
+  [#voter voter-id:7192 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"Hubert J. Farnsworth"]
+    [#data question:"Birthday" answer:"04-09-2841"]
+    [#data question:"Sex" answer:"Male"]
+    [#data question:"Phone Number" answer:"212-399-0371"]
+    [#data question:"Address" answer:"650 W 57th St, New New York, NY 10019"]
+    [#data question:"Last four digits of your Social Security number" answer:"2458"]
+    [#data question:"Party" answer:"National Ray-Gun Association"]
+  ]
+
+  [#voter voter-id:9253 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"Turanga Leela"]
+    [#data question:"Birthday" answer:"07-29-2975"]
+    [#data question:"Sex" answer:"Female"]
+    [#data question:"Phone Number" answer:"212-307-7760"]
+    [#data question:"Address" answer:"715 9th Ave, Apt 1I, New New York, NY 10019"]
+    [#data question:"Last four digits of your Social Security number" answer:"3001"]
+    [#data question:"Party" answer:"No party"]
+  ]
+
+  [#voter voter-id:1298 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"yes"]
+    [#data question:"Name" answer:"Bender Bending Rodriguez"]
+    [#data question:"Birthday" answer:"01-02-2996"]
+    [#data question:"Sex" answer:"Manbot"]
+    [#data question:"Phone Number" answer:""]
+    [#data question:"Address" answer:"620 W 42nd St, Apt 00100100, New New York, NY 10036"]
+    [#data question:"Last four digits of your Social Security number" answer:"BU22"]
+    [#data question:"Party" answer:"No party"]
+  ]
+
+  [#voter voter-id:1782 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"John A. Zoidberg"]
+    [#data question:"Birthday" answer:"05-05-2914"]
+    [#data question:"Sex" answer:"Male"]
+    [#data question:"Phone Number" answer:""]
+    [#data question:"Address" answer:"The dumpster behind 650 W 57th St, New New York, NY 10019"]
+    [#data question:"Last four digits of your Social Security number" answer:"DXC7"]
+    [#data question:"Party" answer:"People for the Ethical Treatment of Humans"]
+  ]
+
+  [#voter voter-id:8432 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"Hermes Conrad"]
+    [#data question:"Birthday" answer:"07-15-2959"]
+    [#data question:"Sex" answer:"Male"]
+    [#data question:"Phone Number" answer:""]
+    [#data question:"Address" answer:"105 Duane St, Apt 3007, New New York, NY 10007"]
+    [#data question:"Last four digits of your Social Security number" answer:"6789"]
+    [#data question:"Party" answer:"Brain Slug Party"]
+  ]
+
+  [#voter voter-id:6643 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"Amy Wong"]
+    [#data question:"Birthday" answer:"05-04-2978"]
+    [#data question:"Sex" answer:"Female"]
+    [#data question:"Phone Number" answer:"212-995-8833"]
+    [#data question:"Address" answer:"10 West St, New New York, NY 10004"]
+    [#data question:"Last four digits of your Social Security number" answer:"5523"]
+    [#data question:"Party" answer:"Dudes for the Legalization of Hemp"]
+  ]
+
+  [#voter voter-id:2318 children:
+    [#data question:"citizen" answer:"yes"]
+    [#data question:"felon" answer:"no"]
+    [#data question:"Name" answer:"I. C. Wiener"]
+    [#data question:"Birthday" answer:"12-31-1999"]
+    [#data question:"Sex" answer:"Male"]
+    [#data question:"Phone Number" answer:"212-555-1221"]
+    [#data question:"Address" answer:"405 W 43rd St, New New York, NY 10036"]
+    [#data question:"Last four digits of your Social Security number" answer:"3000"]
+    [#data question:"Party" answer:"Antisocialists"]
+  ]
+```
+
+## Styles
+This app needs a good amount of CSS to style the layout of the registration form and the voter cards.
+
+```css
+@font-face {
+  font-family: "futurama";
+  src: url("assets/fr-bold.ttf") format("truetype");
+}
+
+.nav-bar {
+  order: 1;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  min-height: 44px;
+}
+
+.nav-bar button {
+  padding: 10px;
+  margin-right: 15px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background: none;
+  font-size: 14px;
+}
+
+.app-window.home-screen {
+  background: radial-gradient(circle at bottom,#5ef5fc,#0b527a,#012535);
+}
+
+.thank-you {
+  font-family: "futurama";
+  text-align: center;
+  margin: 100px 0px;
+  font-size: 48px;
+  color: white;
+}
+
+.old-freebie {
+  align-self: center;
+}
+
+.begin-btn {
+  width: 220px;
+  height: 60px;
+  align-self: center;
+  margin-top: 150px;
+  font-size: 16px;
+  background: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+}
+
+.app-window {
+  background: white;
+  order: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  height: 100%;
+}
+
+.voter-card {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.address-field {
+  width: 500px;
+}
+
+.voter-name {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.voter-address {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.birth-info {
+  display: flex;
+}
+
+.birth-info div {
+  padding-right: 50px;
+}
+```
