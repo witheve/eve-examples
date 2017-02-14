@@ -178,6 +178,7 @@ A little CSS to clean things up and make the page more readable.
   line-height: 50px;
   color: #fff;
   user-select: none;
+  cursor: pointer;
 }
 
 .main-page {
