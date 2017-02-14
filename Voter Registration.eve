@@ -99,7 +99,7 @@ bind @browser
     [#div class:"your-name" children:
       [#h1 class:"segment-title" text: "Your name"]
       [#div children:
-        [#field question:"Name"]
+        [#field class:"name-field" question:"Name"]
       ]
     ]
 
@@ -474,6 +474,16 @@ This app needs a good amount of CSS to style the layout of the registration form
   margin-left: 8px;
 }
 
+.name-field {
+  width: 300px;
+  display: inline;
+}
+
+.address-field {
+  width: 500px;
+  display: inline;
+}
+
 .radio-field {
   margin: 6px 0px;
 }
@@ -495,11 +505,6 @@ This app needs a good amount of CSS to style the layout of the registration form
   border: 1px solid #555;
   border-radius: 6px;
   padding: 10px;
-}
-
-.address-field {
-  width: 500px;
-  display: inline;
 }
 
 .submit-btn {
