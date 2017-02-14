@@ -70,6 +70,7 @@ bind @browser
     [#div class:"thank-you" text:"Thank you for registering to vote!"]
     [#img class:"old-freebie" src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Futurama_flag_of_Earth.svg/720px-Futurama_flag_of_Earth.svg.png"]
     [#button target:"Register" class:"begin-btn" text:"Begin a new registration"]
+    [#div class:"sponsor" text:"This election sponsored with love by MomCorp"]
   ]
 ```
 
@@ -86,47 +87,65 @@ search @session @browser
 bind @browser
   window.class += "voter-registration"
   window <- [children:
-
-    [#div class:"qualifications" text:"Qualifications" children:
-      [#div #qualify-test name:"citizen" text:"Are you a citizen of Planet Earth?"]
-      [#div #qualify-test name:"felon" text:"Are you a convicted felon?"]
+  
+    [#div class:"qualifications" children:
+      [#h1 class:"segment-title" text:"Qualifications"]
+      [#div children:
+        [#div #qualify-test name:"citizen" text:"Are you a citizen of Planet Earth?"]
+        [#div #qualify-test name:"felon" text:"Are you a convicted felon?"]
+      ]
     ]
 
-    [#div class:"your-name" text:"Your name" children:
-      [#field question:"Name"]
+    [#div class:"your-name" children:
+      [#h1 class:"segment-title" text: "Your name"]
+      [#div children:
+        [#field question:"Name"]
+      ]
     ]
 
-    [#div class:"personal-info" text:"More information" children:
-      [#field class:"birth-field" length:10 question:"Birthday" placeholder:"MM-DD-YYYY"]
-      [#div text:"Sex" children:
-        [#div gender-name sort:order children:
-          [#div text:gender-name]
-          [#input type:"radio" name:"Sex" value:gender-name]
+    [#div class:"personal-info" children:
+      [#h1 text:"More information"]
+      [#div children:
+        [#field class:"birth-field" length:10 question:"Birthday" placeholder:"MM-DD-YYYY"]
+        [#div class:"gender-field" children:
+          [#div text:"Sex"]
+          [#div children:
+            [#div gender-name text:gender-name class:"radio-field" sort:order children:
+              [#input type:"radio" name:"Sex" value:gender-name]
+            ]
+          ]
+        ]
+        [#field class:"phone-field" length:12 question:"Phone Number" placeholder:"XXX-XXX-XXXX"]
+      ]
+    ]
+
+    [#div class:"home-address" children:
+      [#h1 text:"The address where you live"]
+      [#div children:
+        [#field class:"address-field" question:"Address" placeholder:"Street Address, Apt. Number (if applicable), City/Town/Village Zip Code"]
+      ]
+    ]
+
+    [#div class:"identification" children:
+      [#h1 text:"Identification"]
+      [#div children:
+        [#field class:"ssn-field" length:4 question:"Last four digits of your Social Security number"]
+      ]
+    ]
+
+    [#div class:"political-party" children:
+      [#h1 text:"Political Party"]
+      [#div children:
+        [#div class:"radio-field" sort:priority text:party-name party-name children:
+          [#input type:"radio" name:"Party" value:party-name]
+        ]
+        [#div class:"radio-field" text:"I do not wish to enroll in a party" sort:999 children:
+          [#input #no-party type:"radio" name:"Party" value:"No party"]
         ]
       ]
-      [#field class:"phone-field" length:12 question:"Phone Number" placeholder:"XXX-XXX-XXXX"]
     ]
 
-    [#div class:"voter-address" text:"The address where you live" children:
-      [#field class:"address-field" question:"Address" placeholder:"Street Address, Apt. Number (if applicable), City/Town/Village Zip Code"]
-    ]
-
-    [#div class:"identification" text:"Identification" children:
-      [#field class:"ssn-field" length:4 question:"Last four digits of your Social Security number"]
-    ]
-
-    [#div class:"political-party" text:"Political Party" children:
-      [#div sort:priority party-name children:
-        [#div text:party-name]
-        [#input type:"radio" name:"Party" value:party-name]
-      ]
-      [#div sort:100 children:
-        [#div text:"I do not wish to enroll in a party"]
-        [#input #no-party type:"radio" name:"Party" value:"No party"]
-      ]
-    ]
-
-    [#button #submit target:"Start" text:"Submit"]
+    [#button #submit class:"submit-btn" target:"Start" text:"Submit"]
 ]
 ```
 
@@ -139,9 +158,9 @@ search @browser
 
 bind @browser
   test <- [children:
-    [#div text:"Yes:" children:
+    [#div class:"radio-field" text:"Yes" children:
       [#input type:"radio" name value:"yes"]]
-    [#div text:"No:" children:
+    [#div class:"radio-field" text:"No" children:
         [#input type:"radio" name value:"no"]]
    ]
 
@@ -385,6 +404,12 @@ This app needs a good amount of CSS to style the layout of the registration form
 
 .app-window.home-screen {
   background: radial-gradient(circle at bottom,#5ef5fc,#0b527a,#012535);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  order: 2;
 }
 
 .thank-you {
@@ -395,19 +420,29 @@ This app needs a good amount of CSS to style the layout of the registration form
   color: white;
 }
 
-.old-freebie {
-  align-self: center;
-}
-
 .begin-btn {
-  width: 220px;
+  width: auto;
   height: 60px;
-  align-self: center;
+  padding: 0px 20px;
   margin-top: 150px;
   font-size: 16px;
   background: white;
   border: 1px solid #555;
   border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.sponsor {
+  background: url(http://i.imgur.com/sWkxxNU.png) no-repeat;
+  background-size: 60px;
+  background-position: bottom center;
+  width: auto;
+  height: 100px;
+  color: white;
+  position: absolute;
+  bottom: 30px;
+  text-transform: uppercase;
+  font-size: 24px;
 }
 
 .app-window {
@@ -417,6 +452,39 @@ This app needs a good amount of CSS to style the layout of the registration form
   flex-direction: column;
   overflow: scroll;
   height: 100%;
+}
+
+.voter-registration > div {
+  display: flex;
+  border-top: 1px solid #0b527a;
+  align-items: center;
+  padding: 15px 0px;
+  flex: 0 0 auto;
+}
+
+.voter-registration h1 {
+  font-size: 18px;
+  width: 150px;
+  margin-right: 50px;
+  padding-left: 20px;
+  color: #0b527a;
+}
+
+.voter-registration input {
+  margin-left: 8px;
+}
+
+.radio-field {
+  margin: 6px 0px;
+}
+
+.gender-field {
+  display: flex;
+  align-items: center;
+}
+
+.gender-field div {
+  margin-right: 15px;
 }
 
 .voter-card {
@@ -431,6 +499,22 @@ This app needs a good amount of CSS to style the layout of the registration form
 
 .address-field {
   width: 500px;
+  display: inline;
+}
+
+.submit-btn {
+  width: auto;
+  height: 60px;
+  margin-top: 20px;
+  padding: 0px 60px;
+  font-size: 16px;
+  color: white;
+  background: #0b527a;
+  border: 1px solid #555;
+  border-radius: 6px;
+  text-transform: uppercase;
+  align-self: center;
+  flex: 0 0 auto;
 }
 
 .voter-name {
