@@ -37,6 +37,7 @@ search @session @browser
 bind @browser
   nav-bar <- [children: [#button target text:target]]
 ```
+
 This partner block works with the nav buttons by simply setting the app window to whichever nav button is clicked.
 
 ```
@@ -57,7 +58,7 @@ commit
 
 ```
 ## Start Page
-The starting page isn't very complicated - it contains a thank you message for the civically engaged Earthicans, the always-inspiring banner of Earth, Old Freebie, and a button to start a new registration for another voter.
+The starting page isn't very complicated - it contains a thank you message for the civically engaged Earthicans, the flag of Earth, a button to start a new registration for another voter, and a subtle sponsorship message.
 
 ```
 search @session @browser
@@ -87,7 +88,7 @@ search @session @browser
 bind @browser
   window.class += "voter-registration"
   window <- [children:
-  
+
     [#div class:"qualifications" children:
       [#h1 class:"segment-title" text:"Qualifications"]
       [#div children:
@@ -150,7 +151,7 @@ bind @browser
 ```
 
 ### Binary Radio Buttons
-The qualification questions (in the current case, citizenship and criminal status) that appear in the registration form are tagged #`qualify-test` and need text to say Yes and No with radio buttons next to each.
+The qualification questions (in the current case, citizenship and criminal status) that appear in the registration form are tagged #`qualify-test` and need text to say yes and no with radio buttons next to each.
 
 ```
 search @browser
@@ -166,7 +167,7 @@ bind @browser
 
 ```
 ### Text Input Fields
-The questions that require an unadorned #`input` form are tagged as #`field` and get handled here. This finds those records and injects the content into the browser, preserving the `placeholder`, `class`, and `maxlength` properties and passing them on to their appropriate elements.
+The questions that require the standard #`input` form are tagged as #`field` and get handled here. This finds those records and injects the content into the browser, preserving the `placeholder`, `class`, and `maxlength` properties and passing them on to their appropriate elements.
 
 ```
 search @browser
