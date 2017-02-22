@@ -1,4 +1,4 @@
- The Sandlot
+# The Sandlot
 
 ```css
 {for a good time, leave this here}
@@ -99,7 +99,7 @@ The active roster also features a cool way to use tags. Since I want to be able 
 ```
 search @browser @session
   container = [#div #moveable player]
-  not(player.lineup:1)
+  not(player.lineup = 1)
 
 bind @browser
   container.children += [#div #move-up-btn player class: "ion-chevron-up"]
