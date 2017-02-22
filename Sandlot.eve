@@ -1,14 +1,18 @@
 # The Sandlot
+
 ```css
 {for a good time, leave this here}
 ```
 
 ## What is this?
-This baseball batting order app is in honor of @baseballfan69 and demonstrates reusable components and tag behavior in the form of #`player-card` and how to inject those components into the browser. This is an extremely useful abstraction to learn because it lets you build in layers, instead of having to build a feature top-to-bottom before it can be useful. In this case, I define the page layout first, then add some player cards into the page layout, then add some buttons into those cards, and finally add some functionality to those buttons. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
+
+This app demonstrates how to create a resuable component and how to inject it into the browser. This app displays a batting order for a baseball team using a `#player-card` component. This component displays information relating to each player on a baseball team -- picture, name, position, and handedness. A `#player-card` can also be configured with additional functionality using optional tags. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
 
 ## Page Layout
+
 ### Containers
-I want to break the page down into a couple sections: one for the active lineup and the bench players, and one for players on injured reserve.
+
+I want to break the page down into two sections: one for the active lineup and the bench players, and one for players on injured reserve.
 
 ```
 commit @browser
@@ -19,23 +23,25 @@ commit @browser
 ```
 
 ### Active Lineup
-The first column drawn should be the active batting order. While I could have specified all the text and contents of each player in this block, note that I used two tags, #`player-card` and #`moveable`, whose contents and behavior get defined later. Since every player listed is going to have the same information, #`player-card` lets me drop the tag in and define all the html and content later, which is done in the Player Cards section after this one.
+
+The first column drawn should be the active batting order. While I could have specified all the text and contents of each player in this block, note that I used two tags, `#player-card` and `#moveable`, whose contents and behavior get defined later. Since every player listed is going to have the same information, `#player-card` lets me drop the tag in and define all the HTML and content later, which is done in the Player Cards section after this one.
 
 ```
 search @session @browser
-  player = [#player not(#bench) not(#injured) firstname lastname position bats lineup photo]
+  player = [#player not(#bench) not(#injured) lineup]
   active = [#active]
 
 bind @browser
-  active.children += [#div #lineup children: [#player-card #moveable sort:lineup player]]
+  active.children += [#div #lineup children: [#player-card #moveable player sort: lineup]]
 ```
 
 ### Bench Players
-These are the bench players. Note that #`player-card` is used again, saving me the work of having to define all the same html and content that's used in the active lineup. The big difference here is the ordering of the players. Whereas the players in the lineup have a deliberate and specific order (which makes sense for things like a batting order), I don't need a specific order for the bench players. I do, however, want to know how many there are and make sure they render in the same order each time, so I sort by the `player` variable to get an index, `n`. Each player gets assigned an index, which is how I sort the bench players, and also set `player.lineup` to that index so they get numbered 1, 2, 3, and so on.
+
+These are the bench players. Note that `#player-card` is used again, saving me the work of having to define all the same html and content that's used in the active lineup. The big difference here is the ordering of the players. Whereas the players in the lineup have a deliberate and specific order (which makes sense for things like a batting order), I don't need a specific order for the bench players. I do, however, want to know how many there are and make sure they render in the same order each time, so I sort by the `player` variable to get an index, `n`. Each player gets assigned an index, which is how I sort the bench players, and also set `player.lineup` to that index so they get numbered 1, 2, 3, and so on.
 
 ```
 search @session @browser
-  player = [#player #bench firstname lastname position bats lineup photo]
+  player = [#player #bench lineup]
   inactive = [#inactive]
   n = sort[value:player]
 
@@ -45,11 +51,12 @@ bind @session @browser
 ```
 
 ### Injured Reserve
-These are the injured reserve players. This section is functionally identical to the bench player section, except it gets merged into the #`IR` section on the page. There's only one player on the IR and no functionality exists to move him elsewhere, because he is a jerk.
+
+These are the injured reserve players. This section is functionally identical to the bench player section, except it gets merged into the `#IR` section on the page. There's only one player on the IR and no functionality exists to move him elsewhere, because he is a jerk.
 
 ```
 search @session @browser
-  player = [#player #injured not(#bench) firstname lastname position bats lineup photo]
+  player = [#player #injured not(#bench) lineup]
   IR = [#IR]
   n = sort[value:player]
 
@@ -59,34 +66,35 @@ bind @session @browser
 ```
 
 ## Player Cards
-This is where the magic happens. Every time this finds #`player-card` in the browser, it will make a #`div` for each player and spit out a player card. It checks to see if the player has a nickname as well, and just leaves a space between the first and last names if there isn't. It's worth mentioning that because I want this to be as general a template as possible, a handful of architectural decisions were made to facilitate that. In the sections that draw each of the three lists, I use the search parameters there to select the specific players I want and inject those player cards. In the Roster Data, all the players have a `lineup` attribute even though the bench and IR players have an empty string as the value. If you're good at predicting which reusable parts you'll need, you can implement these sorts of things from the outset, or you can figure out where they need to be as you go along and refactor them into your code as you work.
+
+This is where the magic happens. Every time this finds `#player-card` in the browser, it will make a `#div` for each player and spit out a player card. It checks to see if the player has a nickname as well, and just leaves a space between the first and last names if there isn't. It's worth mentioning that because I want this to be as general a template as possible, a handful of architectural decisions were made to facilitate that. In the sections that draw each of the three lists, I use the search parameters there to select the specific players I want and inject those player cards. In the Roster Data, all the players have a `lineup` attribute even though the bench and IR players have an empty string as the value. If you're good at predicting which reusable parts you'll need, you can implement these sorts of things from the outset, or you can figure out where they need to be as you go along and refactor them into your code as you work.
 
 ```
 search @browser @session
   container = [#player-card player]
   player = [#player firstname lastname position bats lineup photo]
   middle = if player.nickname then " \"{{player.nickname}}\" "
-             else " "
+           else " "
 
 bind @browser
-  container <- [#div player class:"lineup-position" children:
-    [#div class:"bat-number" text:lineup]
-    [#div class:"player-info" children:
-      [#img class:"player-photo" src:photo]
-      [#div class:"player-text" children:
-        [#div class:"name-line" children:
-          [#div class:"position" text:position]
-          [#div class:"first-name" text:firstname]
-          [#div class:"middle-name" text:middle]
-          [#div class:"last-name" text:lastname]]
-        [#div class:"bat-hand" text:"Bats: {{bats}}"]]
-    ]
-  ]
+  container <- [#div player class: "lineup-position" children:
+    [#div class: "bat-number" text: lineup]
+    [#div class: "player-info" children:
+      [#img class: "player-photo" src: photo]
+      [#div class: "player-text" children:
+        [#div class: "name-line" children:
+          [#div class: "position" text: position]
+          [#div class: "first-name" text: firstname]
+          [#div class: "middle-name" text: middle]
+          [#div class: "last-name" text: "lastname"]]
+        [#div class:"bat-hand" text:"Bats: {{bats}}"]]]]
 ```
 
 ## Buttons
+
 ### Move Up
-The active roster also features a cool way to use tags. Since I want to be able to reorder my active lineup, each #`player-card` there is also tagged #`moveable`. This checks to see if a #`player-card` is #`moveable` and adds a child #`div` to it with a #`move-up-btn`, unless that player is already at the top of roster and can't move up any further.
+
+The active roster also features a cool way to use tags. Since I want to be able to reorder my active lineup, each `#player-card` there is also tagged `#moveable`. This checks to see if a `#player-card` is `#moveable` and adds a child `#div` to it with a `#move-up-btn`, unless that player is already at the top of roster and can't move up any further.
 
 ```
 search @browser @session
@@ -94,15 +102,15 @@ search @browser @session
   not(player.lineup:1)
 
 bind @browser
-  container.children += [#div player #move-up-btn class:"ion-chevron-up"]
+  container.children += [#div #move-up-btn player class: "ion-chevron-up"]
 ```
 
-It's like hashtag inception. Just as the #`moveable` tag let Eve know to add a #`move-up-btn`, this block adds another layer of functionality by giving that button some behavior. In this case, when a #`move-up-btn` is clicked, Eve captures who the specific `clicked-player` is, finds whoever is one space above them in the lineup, and switches their places.
+It's like hashtag inception. Just as the `#moveable` tag let Eve know to add a `#move-up-btn`, this block adds another layer of functionality by giving that button some behavior. In this case, when a `#move-up-btn` is clicked, Eve captures who the specific `clicked-player` is, finds whoever is one space above them in the lineup, and switches their places.
 
 ```
 search @browser @event @session
-  [#click element:[#move-up-btn player:clicked-player]]
-  above-clicked = [#player lineup:clicked-player.lineup - 1]
+  [#click element: [#move-up-btn player: clicked-player]]
+  above-clicked = [#player lineup: clicked-player.lineup - 1]
 
 commit
   clicked-player.lineup := clicked-player.lineup - 1
@@ -110,23 +118,24 @@ commit
 ```
 
 ### Move Down
-This block is the mirror of the move up buttons. If a #`player-card` is #`moveable`, and not at the bottom of the lineup, which is what the `count` is checking, then a child #`div` gets added with a #`move-down-btn`.
+
+This block is the mirror of the move up buttons. If a `#player-card` is `#moveable`, and not at the bottom of the lineup, which is what the `count` is checking, then a child `#div` gets added with a `#move-down-btn`.
 
 ```
 search @browser @session
   container = [#div #moveable player]
-  not(player.lineup:count[given:[#player not(#bench) not(#injured)]])
+  not(player.lineup: count[given: [#player not(#bench) not(#injured)]])
 
 bind @browser
-  container.children += [#div #move-down-btn player class:"ion-chevron-down"]
+  container.children += [#div #move-down-btn player class: "ion-chevron-down"]
 ```
 
-Once again the reciprocal of the previous section, when a #`move-down-btn` is clicked, Eve captures the specific `clicked-player`, finds the player one space below them in the lineup, and switches their places.
+Once again the reciprocal of the previous section, when a `#move-down-btn` is clicked, Eve captures the specific `clicked-player`, finds the player one space below them in the lineup, and switches their places.
 
 ```
 search @browser @event @session
-  [#click element:[#move-down-btn player:clicked-player]]
-  below-clicked = [#player lineup:clicked-player.lineup + 1]
+  [#click element:[#move-down-btn player: clicked-player]]
+  below-clicked = [#player lineup: clicked-player.lineup + 1]
 
 commit
   clicked-player.lineup := clicked-player.lineup + 1
@@ -134,21 +143,22 @@ commit
 ```
 
 ### Remove from Lineup
-If a player is #`moveable`, it means they're in the active lineup and should be able to be removed from the active lineup and sent to the bench. This simply looks for any #`moveable` players and adds a #`deactivate` button to them.
+
+If a player is `#moveable`, it means they're in the active lineup and should be able to be removed from the active lineup and sent to the bench. This simply looks for any `#moveable` players and adds a `#deactivate` button to them.
 
 ```
 search @browser @session
   container = [#div #moveable player]
 
 bind @browser
-  container.children += [#div #deactivate player class:"ion-log-out"]
+  container.children += [#div #deactivate player class: "ion-log-out"]
 ```
 
-This gives #`deactivate` its behavior. The `clicked-player` is sent to the bench and is stripped of their lineup order. All the players who were below them on the lineup get moved up a spot so that there aren't gaps in the numbering.
+This gives `#deactivate` its behavior. The `clicked-player` is sent to the bench and is stripped of their lineup order. All the players who were below them on the lineup get moved up a spot so that there aren't gaps in the numbering.
 
 ```
 search @browser @event @session
-  [#click element:[#deactivate player:clicked-player]]
+  [#click element: [#deactivate player: clicked-player]]
   players-below = [#player lineup > clicked-player.lineup]
 
 commit
@@ -157,11 +167,11 @@ commit
   players-below.lineup := players-below.lineup - 1
 ```
 
-This block takes care of an edge case for #`deactivate`. Because the previous block finds all the `players-below` the `clicked-player`, if the player is at the bottom of the lineup then there are no `players-below` and the search block fails, preventing the button from doing anything. This makes sure you can move the ninth batter off the lineup onto the bench.
+This block takes care of an edge case for `#deactivate`. Because the previous block finds all the `players-below` the `clicked-player`, if the player is at the bottom of the lineup then there are no `players-below` and the search block fails, preventing the button from doing anything. This makes sure you can move the ninth batter off the lineup onto the bench.
 
 ```
 search @browser @event @session
-  [#click element:[#deactivate player:clicked-player]]
+  [#click element: [#deactivate player: clicked-player]]
 
 commit
   clicked-player += #bench
@@ -169,23 +179,24 @@ commit
 ```
 
 ### Add to Lineup
-This adds an #`activate` button to the bench players so we can add them to the active lineup, but only if there are fewer than nine batters already in the lineup.
+
+This adds an `#activate` button to the bench players so we can add them to the active lineup, but only if there are fewer than nine batters already in the lineup.
 
 ```
 search @browser @session
   container = [#div #benched player]
-  active-players = if c = count[given:[#player not(#bench) not(#injured)]] then c else 0
+  active-players = if c = count[given: [#player not(#bench) not(#injured)]] then c else 0
   active-players != 9
 
 bind @browser
   container.children += [#div #activate player class:"ion-log-in"]
 ```
 
-This gives #`activate` its behavior. When an #`activate` button is clicked, Eve finds out how many active players are in the lineup then adds the `clicked-player` and assigns them the next number in the lineup.
+This gives `#activate` its behavior. When an `#activate` button is clicked, Eve finds out how many active players are in the lineup then adds the `clicked-player` and assigns them the next number in the lineup.
 
 ```
 search @browser @event @session
-  [#click element:[#activate player:clicked-player]]
+  [#click element: [#activate player:clicked-player]]
   active-players = if c = count[given:[#player not(#bench) not(#injured)]] then c else 0
   active-players != 9
 
@@ -195,6 +206,7 @@ commit
 ```
 
 ## Roster Data
+
 Our sample roster data.
 
 ```
@@ -215,6 +227,7 @@ commit
 ```
 
 ## Styles
+
 The app needs a good bit of CSS to organize the page sections and various buttons as well as stylize the player cards.
 
 ```css
