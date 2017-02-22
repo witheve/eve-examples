@@ -6,13 +6,13 @@
 
 ## What is this?
 
-This baseball batting order app is in honor of @baseballfan69 and demonstrates reusable components and tag behavior in the form of `#player-card` and how to inject those components into the browser. This is an extremely useful abstraction to learn because it lets you build in layers, instead of having to build a feature top-to-bottom before it can be useful. In this case, I define the page layout first, then add some player cards into the page layout, then add some buttons into those cards, and finally add some functionality to those buttons. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
+This app demonstrates how to create a resuable component and how to inject it into the browser. This app displays a batting order for a baseball team using a `#player-card` component. This component displays information relating to each player on a baseball team -- picture, name, position, and handedness. A `#player-card` can also be configured with additional functionality using optional tags. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
 
 ## Page Layout
 
 ### Containers
 
-I want to break the page down into a couple sections: one for the active lineup and the bench players, and one for players on injured reserve.
+I want to break the page down into two sections: one for the active lineup and the bench players, and one for players on injured reserve.
 
 ```
 commit @browser
