@@ -1,4 +1,4 @@
-# The Sandlot
+ The Sandlot
 
 ```css
 {for a good time, leave this here}
@@ -241,7 +241,6 @@ The app needs a good bit of CSS to organize the page sections and various button
   overflow: scroll;
   height: 1000px;
   border-bottom: 1px solid #555;
-  margin-bottom:
 }
 
 .IR {
@@ -368,7 +367,203 @@ The app needs a good bit of CSS to organize the page sections and various button
   position: absolute;
   right: 15px;
   transform: scaleX(-1);
-  color: 009ee0;
+  color: #009ee0;
   font-size: 24px;
+}
+```
+
+```css
+@media (max-width: 1848px) {
+
+.container  {
+  flex-direction: column;
+  border-bottom: none;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.IR {
+  width: 515px;
+  margin-top: 0px;
+}
+
+.lineup {
+  display: flex;
+  font-size: 18px;
+  margin-right: 0px;
+  flex: 0 0 auto;
+  width: 415px;
+  min-width: 415px;
+  min-height: 100px;
+  margin-bottom: 20px;
+}
+
+.lineup-position {
+  margin-top: 12px;
+}
+
+.bat-number {
+  font-size: 30px;
+  margin-right: 15px;
+  width: 50px;
+}
+
+.player-info {
+  height: 45px;
+  width: 400px;
+}
+
+.name-line {
+  margin: 5px 8px;
+}
+
+.position {
+  font-size: 10px;
+  margin-right: 8px;
+}
+
+.first-name {
+  font-size: 12px;
+}
+
+.middle-name {
+  font-size: 12px;
+}
+
+.last-name {
+  font-size: 12px;
+}
+
+.player-photo {
+  height: 45px;
+  width: 45px;
+}
+
+.bat-hand {
+  font-size: 10px;
+  margin:  5px 8px;
+}
+
+.ion-chevron-up {
+  top: 0px;
+  right: 15px;
+  font-size: 16px;
+}
+
+.ion-chevron-down {
+  bottom: 0px;
+  right: 15px;
+  font-size: 16px;
+}
+
+.ion-log-out {
+  right: 15px;
+  font-size: 16px;
+}
+
+.ion-log-in {
+  right: 15px;
+  font-size: 16px;
+}
+
+}
+```
+
+```css
+@media (max-width: 1200px) {
+
+.container  {
+  flex-direction: column;
+  border-bottom: none;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.IR {
+  width: 515px;
+  margin-top: 0px;
+}
+
+.lineup {
+  display: flex;
+  font-size: 18px;
+  margin-right: 0px;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 150px;
+  min-height: 100px;
+  margin-bottom: 20px;
+}
+
+.lineup-position {
+  margin-top: 12px;
+}
+
+.bat-number {
+  font-size: 30px;
+  margin-right: 0px;
+  width: 0px;
+}
+
+.player-info {
+  height: 55px;
+  width: 100%;
+}
+
+.name-line {
+  margin: 2px 8px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.position {
+  font-size: 8px;
+  margin-right: 5px;
+}
+
+.first-name {
+  font-size: 10px;
+}
+
+.middle-name {
+  font-size: 10px;
+}
+
+.last-name {
+  font-size: 10px;
+}
+
+.player-photo {
+  height: 55px;
+  width: 55px;
+}
+
+.bat-hand {
+  font-size: 10px;
+  margin:  0px 8px;
+}
+
+.ion-chevron-up {
+  top: 7px;
+  right: 8px;
+  font-size: 12px;
+}
+
+.ion-chevron-down {
+  bottom: 6px;
+  right: 8px;
+  font-size: 12px;
+}
+
+.ion-log-out {
+  right: 8px;
+  font-size: 12px;
+}
+
+.ion-log-in {
+  right: 8px;
+  font-size: 12px;
+}
+
 }
 ```
