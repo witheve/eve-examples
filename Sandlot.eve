@@ -86,7 +86,7 @@ bind @browser
           [#div class: "position" text: position]
           [#div class: "first-name" text: firstname]
           [#div class: "middle-name" text: middle]
-          [#div class: "last-name" text: "lastname"]]
+          [#div class: "last-name" text: lastname]]
         [#div class:"bat-hand" text:"Bats: {{bats}}"]]]]
 ```
 
