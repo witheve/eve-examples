@@ -1,0 +1,237 @@
+# Log In Application
+```css
+{}
+```
+
+## 
+## Set up the application
+
+The app contains the current page, as well as the current user.
+
+```
+bind @browser
+  [#app #div page: "login"]
+```
+
+Log In Form
+
+The log in form co ntains two input boxes, one for the username and another for a password.
+
+```
+search @browser
+  app = [#app page: "login"]
+  
+bind @browser
+  app.children +=
+    [#form name: "Login" children: 
+      [#section children: 
+        [#field type: "input" field: "username"]
+        [#field type: "password" field: "password"]]]
+    [#button #signup text: "Sign Up" ]
+```
+
+Handle Login
+
+```
+search @browser @session
+  [#form name: "Login" submission: [data: username]]
+  username.key = "username"
+  [#form name: "Login" submission: [data: password]]
+  password.key = "password"
+  user = [#user username: username.value, password: password.value]
+  app = [#app]
+  
+commit @browser
+  app.page := "profile"
+  app.user := user
+```
+
+Clicking the sign up button changes the page to the sign up page
+
+```
+search @browser @event
+  [#click element: [#signup]] 
+  app = [#app]
+  
+commit @browser
+  app.page := "signup"
+```
+
+## Sign Up Form
+
+```
+search @browser
+  app = [#app page: "signup"]
+  
+bind @browser
+  app.children +=
+    [#form name: "Sign Up" children: 
+      [#section children: 
+        [#field type: "input" field: "username"]
+        [#field type: "password" field: "password"]]]
+    [#button #login text: "Log In" ]
+```
+
+Handle sign up form submission
+
+```
+search @browser
+  [#form name: "Sign Up" submission: [data: username]]
+  username.key = "username"
+  [#form name: "Sign Up" submission: [data: password]]
+  password.key = "password"
+  app = [#app]
+
+commit @browser
+  app.page := "login"
+  
+commit
+  [#user username: username.value, password: password.value]
+```
+
+Clicking the login button changes the page back to the login screen
+
+```
+search @browser @event
+  [#click element: [#login]] 
+  app = [#app]
+  
+commit @browser
+  app.page := "login"
+```
+
+## Profile Page
+
+```
+search @browser @session
+  app = [#app page: "profile" user]
+  
+bind @browser
+  app.children += 
+    [#div text: "Welcome {{user.username}}!"]
+    [#button #logout text: "Log Out"]
+```
+
+Clicking logout returns to the login page
+
+```
+search @browser @event
+  [#click element: [#logout]] 
+  app = [#app]
+  
+commit @browser
+  app.user := none
+  app.page := "login"
+```
+
+A Custom Form Element
+
+Forms have a title, and various section. Each section has a secition label, and contains one or more fields, which are key value pairs. Each field additionally has they input type of that field.
+
+A form is also a div
+
+```
+search @browser
+  form = [#form]
+  
+bind @browser
+  form += #div
+  form.sort := 0
+  form.class := "form"
+```
+
+Display the form name
+
+```
+search @browser
+  form = [#form name]
+  
+bind @browser
+  form.children += [#h1 sort: 0 text: name]
+```
+
+Display each section
+
+```
+search @browser
+  section = [#section]
+  
+bind @browser
+  section += #div
+  section.class := "form-section"
+  section.sort := 1
+```
+
+If the section has a name, display it
+
+```
+search @browser
+  section = [#section name]
+  
+bind @browser
+  section.children += [#h2 text: section.name]
+```
+
+Display the fields in each section
+
+```
+search @browser
+  field = [#field]
+  
+bind @browser
+  field.tag += field.type 
+  field.placeholder := field.field
+```
+
+Display a submit button at the end of the form
+
+```
+search @browser
+  form = [#form]
+  
+bind @browser
+  form.children += [#button #submit form sort: 100 text: "Submit"]
+```
+
+### Save Input to Records
+
+```
+search @browser @event @session
+  click = [#click element: [#submit form]]
+  section = form.children
+  key = form.children.children.field
+  value = form.children.children.value
+  [#time timestamp: time]
+  
+bind @browser
+  form.submission += [#submission click time form data: [section key value]]
+  
+
+```
+### Custom Input Types
+
+Render password fields
+
+```
+search @browser
+  password = [#password]
+  
+bind @browser
+  password += #input
+```
+
+## Styles
+
+```css
+.form-section {
+ border: 1px solid black; 
+ padding: 10px;
+ margin: 10px;
+}
+
+.form {
+  border: 1px solid black; 
+  padding: 10px;
+  margin: 10px;
+}
+```
