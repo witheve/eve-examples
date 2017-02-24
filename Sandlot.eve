@@ -228,11 +228,13 @@ The app needs a good bit of CSS to organize the page sections and various button
   overflow: scroll;
   height: 1000px;
   border-bottom: 1px solid #555;
+  flex: 1 1 auto;
 }
 
 .IR {
   width: 515px;
-  margin-top: 60px;
+  margin-top: 30px;
+  flex: 1 0 auto;
 }
 
 .lineup {
@@ -334,6 +336,7 @@ The app needs a good bit of CSS to organize the page sections and various button
   top: 2px;
   right: 15px;
   font-size: 24px;
+  cursor: pointer;
 }
 
 .ion-chevron-down {
@@ -341,6 +344,7 @@ The app needs a good bit of CSS to organize the page sections and various button
   bottom: 2px;
   right: 15px;
   font-size: 24px;
+  cursor: pointer;
 }
 
 .ion-log-out {
@@ -348,6 +352,7 @@ The app needs a good bit of CSS to organize the page sections and various button
   right: 15px;
   color: #e65b3c;
   font-size: 24px;
+  cursor: pointer;
 }
 
 .ion-log-in {
@@ -356,6 +361,7 @@ The app needs a good bit of CSS to organize the page sections and various button
   transform: scaleX(-1);
   color: #009ee0;
   font-size: 24px;
+  cursor: pointer;
 }
 ```
 
