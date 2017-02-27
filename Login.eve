@@ -1,19 +1,22 @@
 # Log In Application
 ```css
-{}
+{there is currently a bug that causes the first CSS block in an Eve program to be disregarded, so for a good time, leave this here}
 ```
 
-## 
+## What is this?
+
+This app demonstrates the use of a form component in a basic log in application. The app contains three views: a login form, a registration form, and a user profile form that displays the information entered during registration.
+
 ## Set up the application
 
-The app contains the current page, as well as the current user.
+The app contains the current page, as well as the current user. Initially, though, there is no user, so we just need to specify the current page.
 
 ```
 bind @browser
   [#app #div page: "login"]
 ```
 
-Log In Form
+## Log In Form
 
 The log in form co ntains two input boxes, one for the username and another for a password.
 
@@ -30,7 +33,7 @@ bind @browser
     [#button #signup text: "Sign Up" ]
 ```
 
-Handle Login
+A successful login is one where the username and password entered in the login form match some user/password combination stored in the system. For simplicity, passwords are stored as plain text, so we just need to search for a #user with a matching username and password. If one is found, we set it as the user attribute in the #app record.
 
 ```
 search @browser @session
@@ -59,20 +62,26 @@ commit @browser
 
 ## Sign Up Form
 
+The user registration page requests the name, department, a username and password.
+
 ```
 search @browser
   app = [#app page: "signup"]
   
 bind @browser
   app.children +=
-    [#form name: "Sign Up" children: 
-      [#section children: 
+    [#form name: "Sign Up" options: [reset: true] children: 
+      [#section name: "User Info" children: 
+        [#field type: "input" field: "full name"]
+        [#field type: "input" field: "department"]]
+      [#section name: "Account Info" children: 
         [#field type: "input" field: "username"]
-        [#field type: "password" field: "password"]]]
+        [#field type: "password" field: "password"]
+        [#field type: "password" field: "confirm password"]]]
     [#button #login text: "Log In" ]
 ```
 
-Handle sign up form submission
+We need to create a `#user` from the submission of the registration form. This will only work if every field has an entry, and the two password fields match.
 
 ```
 search @browser
@@ -80,6 +89,12 @@ search @browser
   username.key = "username"
   [#form name: "Sign Up" submission: [data: password]]
   password.key = "password"
+  [#form name: "Sign Up" submission: [data: confirm-password]]
+  confirm-password.key = "confirm password"
+
+  // The password and the confirmation must match
+  password.value = confirm-password.value
+  
   app = [#app]
 
 commit @browser
@@ -102,6 +117,8 @@ commit @browser
 
 ## Profile Page
 
+The profile page displays information relating to the current user profile. It is accessed after a successful submission of the login form, which creates a `user` attribute in the `#app`.
+
 ```
 search @browser @session
   app = [#app page: "profile" user]
@@ -112,7 +129,7 @@ bind @browser
     [#button #logout text: "Log Out"]
 ```
 
-Clicking logout returns to the login page
+Clicking logout returns to the login page, and removes the user from `#app`.
 
 ```
 search @browser @event
@@ -124,11 +141,11 @@ commit @browser
   app.page := "login"
 ```
 
-A Custom Form Element
+## A Custom Form Element
 
-Forms have a title, and various section. Each section has a secition label, and contains one or more fields, which are key value pairs. Each field additionally has they input type of that field.
+Forms have a title and one or more sections. Each section has an optional name, and contains one or more fields. Each field additionally has the input type of that field (input, radio button, drop down list, etc.).
 
-A form is also a div
+A form starts as a `#form` record.
 
 ```
 search @browser
@@ -191,6 +208,26 @@ search @browser
   
 bind @browser
   form.children += [#button #submit form sort: 100 text: "Submit"]
+```
+
+Forms can have an optional reset button, which clears the fields in the form
+
+```
+search @browser
+  form = [#form options: [reset: true]]
+  
+bind @browser
+  form.children += [#button #reset form sort: 101 text: "Reset"]
+```
+
+Clicking the reset button clears each field in the form
+
+```
+search @event @browser
+  [#click element: [#reset form]]
+    
+commit @browser
+  form.children.children.value := none
 ```
 
 ### Save Input to Records
