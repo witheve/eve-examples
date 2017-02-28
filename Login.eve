@@ -53,19 +53,22 @@ commit @browser
 
 If the user enters a login that does not match a user, then display a message indicating that the login failed.
 
-```eve disabled
+```eve
 search @browser @session
+  // Get form data
   [#form name: "Login" submission: [data: username]]
   username.key = "username"
   [#form name: "Login" submission: [data: password]]
   password.key = "password"
-  [#user username: username.value, password: password.value]
-
   
-commit @browser
-  [#div text: "login failed"]
-```
+  form = [#form name: "Login"]
+  form-message = [#form-message form]
+  
+  not([#user username: username.value, password: password.value])
 
+commit @browser
+  form-message.text := "** Login Failed **"
+```
 
 Clicking the sign up button changes the page to the sign up page
 
@@ -194,9 +197,11 @@ search @browser
   form = [#form]
   
 bind @browser
-  form.children += [#h1 sort: 0 text: form.name]
-```
+  form.children += [#div children:
+    [#h1 sort: 0 text: form.name]
+    [#div #form-message form sort: 1 class: "form-message"]]
 
+```
 Display each section. To properly display sections, we need to add them to the children of the form.
 
 ```eve
@@ -379,5 +384,9 @@ Styles
   padding: 5px;
   margin: 5px;
   cursor: pointer;
+}
+
+.form-message {
+ color: green; 
 }
 ```
