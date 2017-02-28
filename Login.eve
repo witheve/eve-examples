@@ -13,7 +13,7 @@ The app contains the current page, as well as the current user. Initially, thoug
 
 ```
 bind @browser
-  [#app #div class: "app-wrapper" page: "signup"]
+  [#app #div class: "app-wrapper" page: "login"]
 ```
 
 ## Pages
@@ -210,7 +210,8 @@ search @browser
   form = [#form sections]
     
 bind @browser
-  form.children += [#div section: sections class: "form-section" sort: 1]
+  form.children += [#div form section: sections class: "form-section" sort: 1]
+  sections.form := form
 ```
 
 If the section has a name, display it
@@ -231,13 +232,13 @@ search @browser
   field = section.fields
     
 bind @browser
-  section-display.children += [#div sort: 1 children: 
+  section-display.children += [#div field form: section.form sort: 1 children: 
     [tag: field.type, placeholder: field.field, class: field.type]]
 ```
 
 Display a submit button at the end of the form
 
-```eve disabled
+```eve
 search @browser
   form = [#form]
   
@@ -247,7 +248,7 @@ bind @browser
 
 Forms can have an optional reset button, which clears the fields in the form
 
-```eve disabled
+```eve
 search @browser
   form = [#form options: [reset: true]]
   
@@ -257,35 +258,36 @@ bind @browser
 
 Clicking the reset button clears each field in the form
 
-```eve disabled
+```eve
 search @event @browser
-  [#click element: [#reset form]]
+  [#click element: [#reset]]
+  field-container = [#div field form]
     
 commit @browser
-  form.children.children.value := none
+  field-container.children.value := none
 ```
 
 ### Save Input to Records
 
 Form values are saved as a `#submission` when the submit button is clicked. This submission has a liftime equal to that of the `#click`, so a submission must be comitted to a record by the user. This allows the user to implement custom handling logic.
 
-```eve disabled
+```eve
 search @browser @event @session
   click = [#click element: [#submit form]]
-  section = form.children
-  key = form.children.children.field
-  value = form.children.children.value
+  field-container = [#div field form]
+  value = field-container.children.value
+  key = field.field
   [#time timestamp: time]
   
 bind @browser
-  form.submission += [#submission click time form data: [section key value]]
-  form.children.children.value := none
+  form.submission += [#submission click time form data: [key value]]
+  field-container.children.value := none
 ```
 ### Custom Input Types
 
 Render password fields
 
-```eve disabled
+```eve
 search @browser
   password = [#password]
   
@@ -295,8 +297,9 @@ bind @browser
   password.class := "password"
 ```
 
-Render custom buttons
-```eve disabled
+Render custom button styles
+
+```eve
 search @browser
   button = [#button]
   
@@ -317,6 +320,10 @@ commit
 Styles
 
 ```css
+.application-container {
+ background-color: #000; 
+}
+
 .app-wrapper {
  background-color: #000;
  color: green;
@@ -346,6 +353,7 @@ Styles
  margin: 5px;
  font-family: monospace;
  color: green;
+ outline: none;
 }
 
 .password {
@@ -355,11 +363,12 @@ Styles
  padding: 5px;
  margin: 5px;
  font-family: monospace;
+ outline: none;
  color: green;
 }
 
 .button {
-background-color: #000;
+  background-color: #000;
   color: green;
   border-radius: 5px;
   border: 1px solid green;
