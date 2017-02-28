@@ -6,7 +6,7 @@
 
 ## What is this?
 
-This app demonstrates how to create a resuable component and how to inject it into the browser. This app displays a batting order for a baseball team using a `#player-card` component. This component displays information relating to each player on a baseball team -- picture, name, position, and handedness. A `#player-card` can also be configured with additional functionality using optional tags. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
+This app demonstrates how to create a reusable component and how to inject it into the browser. This app displays a batting order for a baseball team using a `#player-card` component. This component displays information relating to each player on a baseball team -- picture, name, position, and handedness. A `#player-card` can also be configured with additional functionality using optional tags. The app also shows some of the ways `sort` can be used, and how to choose specific records out of a list of records.
 
 ## Page Layout
 
