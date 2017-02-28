@@ -5,18 +5,20 @@
 
 ## What is this?
 
-This app demonstrates the use of a form component in a basic log in application. The app contains three views: a login form, a registration form, and a user profile form that displays the information entered during registration.
+This app demonstrates the use of a  custom form component in a basic log in application. The app contains three views: a login form, a registration form, and a user profile form that displays the information entered during registration. These forms are built using a custom form component, which is defined at the end of the program. The form component allows for the concise definition of forms by defining common behavior like form submission and resetting.
 
-## Set up the application
+## Application Set Up
 
 The app contains the current page, as well as the current user. Initially, though, there is no user, so we just need to specify the current page.
 
 ```
 bind @browser
-  [#app #div class: "app-wrapper" page: "login"]
+  [#app #div class: "app-wrapper" page: "signup"]
 ```
 
-## Log In Form
+## Pages
+
+### Log In Form
 
 The log in form co ntains two input boxes, one for the username and another for a password.
 
@@ -26,8 +28,8 @@ search @browser
   
 bind @browser
   app.children +=
-    [#form name: "Login" children: 
-      [#section children: 
+    [#form name: "Login" sections: 
+      [#section fields: 
         [#field type: "input" field: "username"]
         [#field type: "password" field: "password"]]]
     [#button #signup text: "Sign Up" ]
@@ -76,7 +78,7 @@ commit @browser
   app.page := "signup"
 ```
 
-## Sign Up Form
+### Sign Up Form
 
 The user registration page requests the name, department, a username and password.
 
@@ -86,11 +88,11 @@ search @browser
   
 bind @browser
   app.children +=
-    [#form name: "Sign Up" options: [reset: true] children: 
-      [#section name: "User Info" children: 
+    [#form name: "Sign Up" options: [reset: true] sections: 
+      [#section name: "User Info" fields: 
         [#field type: "input" field: "full name"]
         [#field type: "input" field: "department"]]
-      [#section name: "Account Info" children: 
+      [#section name: "Account Info" fields: 
         [#field type: "input" field: "username"]
         [#field type: "password" field: "password"]
         [#field type: "password" field: "confirm password"]]]
@@ -141,7 +143,7 @@ commit @browser
   app.page := "login"
 ```
 
-## Profile Page
+### Profile Page
 
 ```
 search @browser
@@ -181,7 +183,7 @@ Forms have a title and one or more sections. Each section has an optional name, 
 
 A form starts as a `#form` record.
 
-```
+```eve
 search @browser
   form = [#form]
   
@@ -193,51 +195,49 @@ bind @browser
 
 Display the form name
 
-```
+```eve
 search @browser
-  form = [#form name]
+  form = [#form]
   
 bind @browser
-  form.children += [#h1 sort: 0 text: name]
+  form.children += [#h1 sort: 0 text: form.name]
 ```
 
-Display each section
+Display each section. To properly display sections, we need to add them to the children of the form.
 
-```
+```eve
 search @browser
-  section = [#section]
-  
+  form = [#form sections]
+    
 bind @browser
-  section += #div
-  section.class := "form-section"
-  section.sort := 1
+  form.children += [#div section: sections class: "form-section" sort: 1]
 ```
 
 If the section has a name, display it
 
-```
+```eve
 search @browser
-  section = [#section name fields]
+  section-display = [#div section]
   
 bind @browser
-  section.children += [#h2 text: section.name]
-  fields <- [section]
+  section-display.children += [#h2 text: section.name, sort: 0]
 ```
 
-Display the fields in each section
+Display the fields in each section. As we did with sections, to display fields we need to move them over to the children of the section display.
 
-```
+```eve
 search @browser
-  field = [#field]
+  section-display = [#div section]
+  field = section.fields
     
 bind @browser
-  field += #div
-  field.children += [tag: field.type, placeholder: field.field, class: field.type]
+  section-display.children += [#div sort: 1 children: 
+    [tag: field.type, placeholder: field.field, class: field.type]]
 ```
 
 Display a submit button at the end of the form
 
-```
+```eve disabled
 search @browser
   form = [#form]
   
@@ -247,7 +247,7 @@ bind @browser
 
 Forms can have an optional reset button, which clears the fields in the form
 
-```
+```eve disabled
 search @browser
   form = [#form options: [reset: true]]
   
@@ -257,7 +257,7 @@ bind @browser
 
 Clicking the reset button clears each field in the form
 
-```
+```eve disabled
 search @event @browser
   [#click element: [#reset form]]
     
@@ -269,7 +269,7 @@ commit @browser
 
 Form values are saved as a `#submission` when the submit button is clicked. This submission has a liftime equal to that of the `#click`, so a submission must be comitted to a record by the user. This allows the user to implement custom handling logic.
 
-```
+```eve disabled
 search @browser @event @session
   click = [#click element: [#submit form]]
   section = form.children
@@ -285,7 +285,7 @@ bind @browser
 
 Render password fields
 
-```
+```eve disabled
 search @browser
   password = [#password]
   
@@ -296,7 +296,7 @@ bind @browser
 ```
 
 Render custom buttons
-```
+```eve disabled
 search @browser
   button = [#button]
   
