@@ -263,8 +263,9 @@ search @browser
   field = section.fields
   
 bind @browser
-  section-display.children += [#div field form: section.form sort: 1 children: 
-    [tag: field.type, sort: field.sort, placeholder: field.field, class: field.type]]
+  section-display.children += 
+    [#div field sort: field.sort form: section.form sort: 1 children: 
+      [tag: field.type, placeholder: field.field, class: field.type]]
 ```
 
 Display a submit button at the end of the form
