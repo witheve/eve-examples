@@ -13,7 +13,7 @@ The app contains the current page, as well as the current user. Initially, thoug
 
 ```
 bind @browser
-  [#app #div class: "app-wrapper" page: "login"]
+  [#div #app class: "app-wrapper" page: "login"]
 ```
 
 ## Pages
@@ -28,11 +28,12 @@ search @browser
   
 bind @browser
   app.children +=
+    [#div children:
     [#form name: "Login" sections: 
       [#section fields: 
-        [#field type: "input" field: "username"]
-        [#field type: "password" field: "password"]]]
-    [#button #signup text: "Sign Up" ]
+        [#field sort: 2 type: "password" field: "password"]
+        [#field sort: 1 type: "input" field: "username"]]]
+    [#button #signup text: "Sign Up" ]]
 ```
 
 A successful login is one where the username and password entered in the login form match some user/password combination stored in the system. For simplicity, passwords are stored as plain text, so we just need to search for a #user with a matching username and password. If one is found, we set it as the user attribute in the #app record.
@@ -91,15 +92,18 @@ search @browser
   
 bind @browser
   app.children +=
+   [#div children:
     [#form name: "Sign Up" options: [reset: true] sections: 
       [#section name: "User Info" fields: 
-        [#field type: "input" field: "full name"]
-        [#field type: "input" field: "department"]]
+        [#field sort: 1 type: "input" field: "department"]
+        [#field sort: 2 type: "input" field: "full name"]]
       [#section name: "Account Info" fields: 
-        [#field type: "input" field: "username"]
-        [#field type: "password" field: "password"]
-        [#field type: "password" field: "confirm password"]]]
-    [#button #login text: "Log In" ]
+        [#field sort: 1 type: "input" field: "username"]
+  [#field sort: 2 type: "password" field: "password"]
+        [#field sort: 3 type: "password" field: "confirm password"]
+        
+        ]]
+    [#button #login text: "Log In" ]]
 ```
 
 We need to create a `#user` from the submission of the registration form. This will only work if every field has an entry, and the two password fields match.
@@ -174,7 +178,30 @@ commit @browser
   app.page := "login"
 ```
 
-## A Custom Form Element
+
+An easter egg
+
+```
+search @browser @session
+  app = [#app]
+  
+  // Get form data
+  [#form name: "Login" submission: [data: username]]
+  username.key = "username"
+  username.value = "dnedry"
+  [#form name: "Login" submission: [data: password]]
+  password.key = "password"
+    
+  not([#user username: username.value, password: password.value])
+  
+commit @browser
+  app.children := none
+  app.class -= "app-wrapper"
+  app.class += "uh-uh-uh"
+```
+
+
+A Custom Form Element
 
 Forms have a title and one or more sections. Each section has an optional name, and contains one or more fields. Each field additionally has the input type of that field (input, radio button, drop down list, etc.).
 
@@ -198,7 +225,7 @@ search @browser
   
 bind @browser
   form.children += [#div children:
-    [#h1 sort: 0 text: form.name]
+    [#h1 class: "form-name" sort: 0 text: form.name]
     [#div #form-message form sort: 1 class: "form-message"]]
 
 ```
@@ -220,7 +247,7 @@ search @browser
   section-display = [#div section]
   
 bind @browser
-  section-display.children += [#h2 text: section.name, sort: 0]
+  section-display.children += [#h2 class: "section-name" text: section.name, sort: 0]
 ```
 
 Display the fields in each section. As we did with sections, to display fields we need to move them over to the children of the section display.
@@ -229,10 +256,10 @@ Display the fields in each section. As we did with sections, to display fields w
 search @browser
   section-display = [#div section]
   field = section.fields
-    
+  
 bind @browser
   section-display.children += [#div field form: section.form sort: 1 children: 
-    [tag: field.type, placeholder: field.field, class: field.type]]
+    [tag: field.type, sort: field.sort, placeholder: field.field, class: field.type]]
 ```
 
 Display a submit button at the end of the form
@@ -324,6 +351,12 @@ Styles
 
 .app-wrapper {
  background-color: #000;
+ background-image: url(http://i.imgur.com/BBPkd29.gif);
+ width: 800px;
+ height: 658px;
+ background-size: 100%;
+ padding: 180px;
+ padding-top: 130px;
  color: green;
  font-family: monospace;
 }
@@ -388,5 +421,20 @@ Styles
 
 .form-message {
  color: green; 
+}
+
+.form-name {
+  margin: 0px;
+}
+
+.section-name { 
+  margin: 0px;
+}
+
+.uh-uh-uh {
+ width: 300px;
+ height: 610px;
+ background-image: url(http://i.imgur.com/TpxM57T.gif); 
+ background-color: #FFF;
 }
 ```
