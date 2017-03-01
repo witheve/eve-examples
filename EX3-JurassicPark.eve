@@ -282,8 +282,7 @@ search @browser @event @session
   [#time timestamp: time]
   
 bind @browser
-  // When used in a bind or commit. lookup[] creates a record with the give attribute and value.
-  // We use it here to create a record with the attribute as the field name. 
+  // When used in a bind or commit. lookup[] creates a record with the give attribute and value. We use it here to create a record with the attribute as the field name. 
   //For example, a login form with "username" and "password" fields could be accessed as [#form name: "Login" submission: [username password]]
   lookup[record: submission, attribute: key, value]
   field-container.children.value := none
@@ -329,18 +328,20 @@ commit
 ```css
 .application-container {
  background-color: #000; 
-}
-
-.app-wrapper {
- background-color: #000;
- background-image: url(http://i.imgur.com/BBPkd29.gif);
- width: 800px;
- height: 658px;
- background-size: 100%;
- padding: 180px;
- padding-top: 130px;
  color: green;
  font-family: monospace;
+}
+
+@media (min-width: 1800px) {
+  .app-wrapper {
+    background-image: url(http://i.imgur.com/BBPkd29.gif);
+    background-repeat: no-repeat;
+    width: 800;
+    height: 658px;
+    background-size: 100%;
+    padding: 180px;
+    padding-top: 130px;
+  }
 }
 
 .profile {
