@@ -14,7 +14,8 @@ The app contains the current page, as well as the current user. Initially, thoug
 
 ```
 bind @browser
-  [#div #app class: "app-wrapper" page: "login"]
+  [#div #app class: "app-wrapper" page: "login" children: 
+    [#div text: "Jurassic Park System Security Interface"]]
 ```
 
 ## Pages
