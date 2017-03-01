@@ -1,4 +1,5 @@
 # Log In Application
+
 ```css
 {there is currently a bug that causes the first CSS block in an Eve program to be disregarded, so for a good time, leave this here}
 ```
@@ -151,6 +152,7 @@ commit @browser
 ```
 
 ### Profile Page
+
 The profile page displays information relating to the current user profile. It is accessed after a successful submission of the login form, which creates a user attribute in the #app.
 
 ```
@@ -179,7 +181,9 @@ commit @browser
 ```
 
 
-An easter egg
+### An easter egg
+
+We can specify custom behavior by special casing search conditions and adding new side effects. In this block, we hijack the login process when the username is "dnedry". Instead of displaying the typical "login failed" message, we give the user a surprise.
 
 ```
 search @browser @session
@@ -201,7 +205,7 @@ commit @browser
 ```
 
 
-A Custom Form Element
+## A Custom Form Element
 
 Forms have a title and one or more sections. Each section has an optional name, and contains one or more fields. Each field additionally has the input type of that field (input, radio button, drop down list, etc.).
 
@@ -229,6 +233,7 @@ bind @browser
     [#div #form-message form sort: 1 class: "form-message"]]
 
 ```
+
 Display each section. To properly display sections, we need to add them to the children of the form.
 
 ```eve
@@ -333,8 +338,10 @@ bind @browser
   button.class += "button"
 ```
 
-Test Data
-### Test Users
+## Appendix
+
+### Test Data
+
 ```
 commit
   [#user username: "jhammond" name: "John Hammond" department: "Executive" password: "password"]
@@ -342,7 +349,7 @@ commit
   [#user username: "hwu" name: "Henry Wu" department: "Genetics" password: "slartibartfast"]
 ```
 
-Styles
+### Styles
 
 ```css
 .application-container {
