@@ -354,8 +354,8 @@ commit
     background-image: url(http://i.imgur.com/BBPkd29.gif);
     background-repeat: no-repeat;
     width: 800;
-    height: 658px;
-    background-size: 100%;
+    height: 690px;
+    background-size: 100% 100%;
     padding: 180px;
     padding-top: 130px;
   }
