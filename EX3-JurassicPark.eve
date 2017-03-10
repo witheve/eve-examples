@@ -1,12 +1,8 @@
-# Log In Application
-
-```css
-{there is currently a bug that causes the first CSS block in an Eve program to be disregarded, so for a good time, leave this here}
-```
+# Jurassic Park Terminal
 
 ## What is this?
 
-This app demonstrates the use of a  custom form component in a basic log in application. The app contains three views: a login form, a registration form, and a user profile form that displays the information entered during registration. These forms are built using a custom form component, which is defined at the end of the program. The form component allows for the concise definition of forms by defining common behavior like form submission and resetting.
+This app demonstrates the use of a custom form component in a basic log in application. The app contains three views: a login form, a registration form, and a user profile form that displays the information entered during registration. These forms are built using a custom form component, which is defined at the end of the program. The form component allows for the concise definition of forms by defining common behavior like form submission and resetting.
 
 ## Application Set Up
 
@@ -15,14 +11,14 @@ The app contains the current page, as well as the current user. Initially, thoug
 ```
 bind @browser
   [#div #app class: "app-wrapper" page: "login" children: 
-    [#div text: "Jurassic Park System Security Interface"]]
+    [#div sort: 0 text: "Jurassic Park System Security Interface"]]
 ```
 
 ## Pages
 
 ### Log In Form
 
-The log in form co ntains two input boxes, one for the username and another for a password.
+The log in form contains two input boxes, one for the username and another for a password. We must explicitly sort the fields (using a `sort` attribute) to display them in a specific order.
 
 ```
 search @browser
@@ -30,23 +26,20 @@ search @browser
   
 bind @browser
   app.children +=
-    [#div children:
-    [#form name: "Login" sections: 
-      [#section fields: 
-        [#field sort: 2 type: "password" field: "password"]
-        [#field sort: 1 type: "input" field: "username"]]]
-    [#button #signup text: "Sign Up" ]]
+    [#div sort: 1 children:
+      [#form name: "Login" sections: 
+        [#section fields: 
+          [#field sort: 2 type: "password" field: "password"]
+          [#field sort: 1 type: "input" field: "username"]]]
+      [#button #signup text: "Sign Up" ]]
 ```
 
-A successful login is one where the username and password entered in the login form match some user/password combination stored in the system. For simplicity, passwords are stored as plain text, so we just need to search for a #user with a matching username and password. If one is found, we set it as the user attribute in the #app record.
+A successful login is one where the username and password entered in the login form match some user/password combination stored in the system. For simplicity, passwords are stored as plain text, so we just need to search for a `#user` with a matching username and password. If one is found, we set it as the user attribute in the `#app` record.
 
 ```eve
 search @browser @session
-  [#form name: "Login" submission: [data: username]]
-  username.key = "username"
-  [#form name: "Login" submission: [data: password]]
-  password.key = "password"
-  user = [#user username: username.value, password: password.value]
+  [#form name: "Login" submission: [username password]]
+  user = [#user username password]
   app = [#app]
     
 commit @browser
@@ -57,17 +50,11 @@ commit @browser
 If the user enters a login that does not match a user, then display a message indicating that the login failed.
 
 ```eve
-search @browser @session
-  // Get form data
-  [#form name: "Login" submission: [data: username]]
-  username.key = "username"
-  [#form name: "Login" submission: [data: password]]
-  password.key = "password"
-  
-  form = [#form name: "Login"]
+search @browser @session  
+  form = [#form name: "Login" submission: [username password]]
   form-message = [#form-message form]
   
-  not([#user username: username.value, password: password.value])
+  not([#user username password])
 
 commit @browser
   form-message.text := "** Login Failed **"
@@ -97,14 +84,12 @@ bind @browser
    [#div children:
     [#form name: "Sign Up" options: [reset: true] sections: 
       [#section name: "User Info" fields: 
-        [#field sort: 1 type: "input" field: "department"]
-        [#field sort: 2 type: "input" field: "full name"]]
+        [#field sort: 1 type: "input" field: "full-name"]
+        [#field sort: 2 type: "input" field: "department"]]
       [#section name: "Account Info" fields: 
         [#field sort: 1 type: "input" field: "username"]
-  [#field sort: 2 type: "password" field: "password"]
-        [#field sort: 3 type: "password" field: "confirm password"]
-        
-        ]]
+        [#field sort: 2 type: "password" field: "password"]
+        [#field sort: 3 type: "password" field: "confirm-password"]]]
     [#button #login text: "Log In" ]]
 ```
 
@@ -112,33 +97,16 @@ We need to create a `#user` from the submission of the registration form. This w
 
 ```
 search @browser
-  // Get User Info
-  [#form name: "Sign Up" submission: [data: full-name]]
-  full-name.key = "full name"
-  [#form name: "Sign Up" submission: [data: department]]
-  department.key = "department"
-  
-  // Get Account Info
-  [#form name: "Sign Up" submission: [data: username]]
-  username.key = "username"
-  [#form name: "Sign Up" submission: [data: password]]
-  password.key = "password"
-  [#form name: "Sign Up" submission: [data: confirm-password]]
-  confirm-password.key = "confirm password"
-
+  [#form name: "Sign Up" submission: [username password confirm-password full-name department]]
   // The password and the confirmation must match
-  password.value = confirm-password.value
-  
+  password = confirm-password
   app = [#app]
 
 commit @browser
   app.page := "login"
   
 commit
-  [#user username: username.value 
-         password: password.value
-         name: full-name.value
-         department: department.value]
+  [#user username password name: full-name department]
 ```
 
 Clicking the login button changes the page back to the login screen
@@ -190,14 +158,9 @@ We can specify custom behavior by special casing search conditions and adding ne
 search @browser @session
   app = [#app]
   
-  // Get form data
-  [#form name: "Login" submission: [data: username]]
-  username.key = "username"
-  username.value = "dnedry"
-  [#form name: "Login" submission: [data: password]]
-  password.key = "password"
-    
-  not([#user username: username.value, password: password.value])
+  [#form name: "Login" submission: [username password]]
+  username = "dnedry"
+  not([#user username password])
   
 commit @browser
   app.children := none
@@ -205,6 +168,19 @@ commit @browser
   app.class += "uh-uh-uh"
 ```
 
+Clicking anywhere returns to the login screen
+
+```
+search @browser @session @event
+  [#click]
+  app = [#app class: "uh-uh-uh"]
+  
+commit @browser
+  app.class += "app-wrapper"
+  app.class -= "uh-uh-uh"
+  app.children += [#div sort: 0 text: "Jurassic Park System Security Interface"]
+  app.page := "login"
+```
 
 ## A Custom Form Element
 
@@ -220,6 +196,7 @@ bind @browser
   form += #div
   form.sort := 0
   form.class := "form"
+  form.submission := []
 ```
 
 Display the form name
@@ -302,20 +279,26 @@ commit @browser
 
 ### Save Input to Records
 
-Form values are saved as a `#submission` when the submit button is clicked. This submission has a liftime equal to that of the `#click`, so a submission must be comitted to a record by the user. This allows the user to implement custom handling logic.
+Form values are saved as a `#submission` when the submit button is clicked. This submission has a lifetime equal to that of the `#click`, so a submission must be committed to a record by the user. This allows the user to implement custom handling logic.
+
+One thing this form component does not handle is form validation. In a future example, we will demonstrate how certain fields can be required, while others are optional. This form will submit any fields that are filled, while omitting any that are not. If a form is handled expecting fields that aren't submitted, then the submission will simply be ignored.
 
 ```eve
 search @browser @event @session
   click = [#click element: [#submit form]]
+  form = [#form submission]
   field-container = [#div field form]
   value = field-container.children.value
   key = field.field
   [#time timestamp: time]
   
 bind @browser
-  form.submission += [#submission click time form data: [key value]]
+  // When used in a bind or commit. lookup[] creates a record with the give attribute and value. We use it here to create a record with the attribute as the field name. 
+  //For example, a login form with "username" and "password" fields could be accessed as [#form name: "Login" submission: [username password]]
+  lookup[record: submission, attribute: key, value]
   field-container.children.value := none
 ```
+
 ### Custom Input Types
 
 Render password fields
@@ -353,21 +336,29 @@ commit
 
 ### Styles
 
+
+```css
+{there is currently a bug that causes the first CSS block in an Eve program to be disregarded, so for a good time, leave this here}
+```
+
+
 ```css
 .application-container {
  background-color: #000; 
-}
-
-.app-wrapper {
- background-color: #000;
- background-image: url(http://i.imgur.com/BBPkd29.gif);
- width: 800px;
- height: 658px;
- background-size: 100%;
- padding: 180px;
- padding-top: 130px;
  color: green;
  font-family: monospace;
+}
+
+@media (min-width: 1800px) {
+  .app-wrapper {
+    background-image: url(http://i.imgur.com/BBPkd29.gif);
+    background-repeat: no-repeat;
+    width: 800;
+    height: 690px;
+    background-size: 100% 100%;
+    padding: 180px;
+    padding-top: 130px;
+  }
 }
 
 .profile {
@@ -441,9 +432,9 @@ commit
 }
 
 .uh-uh-uh {
- width: 300px;
- height: 610px;
- background-image: url(http://i.imgur.com/TpxM57T.gif); 
+ width: 320px;
+ height: 520px;
+ background-image: url(http://i.imgur.com/yz53s4N.gif); 
  background-color: #FFF;
 }
 ```
