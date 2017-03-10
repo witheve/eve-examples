@@ -410,6 +410,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   flex-direction: column;
   align-items: center;
   height: 100%;
+  min-height: 1000px;
   order: 2;
 }
 
@@ -423,9 +424,9 @@ This app needs a good amount of CSS to style the layout of the registration form
 
 .begin-btn {
   width: auto;
-  height: 60px;
+  flex: 0 0 50px;
   padding: 0px 20px;
-  margin-top: 150px;
+  margin-top: 5vh;
   font-size: 16px;
   background: white;
   border: 1px solid #555;
@@ -444,6 +445,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   bottom: 30px;
   text-transform: uppercase;
   font-size: 24px;
+  text-align: center;
 }
 
 .app-window {
@@ -540,5 +542,148 @@ This app needs a good amount of CSS to style the layout of the registration form
 
 .birth-info div {
   padding-right: 50px;
+}
+
+@media (max-width:2275px) {
+  
+.nav-bar {
+  min-height: 25px;
+}
+
+.nav-bar button {
+  padding: 0px 10px;
+  margin-right: 10px;
+  font-size: 10px;
+}
+
+.app-window.home-screen {
+  min-height: 550px;
+}
+  
+.thank-you {
+  text-align: center;
+  margin: 50px 0px;
+  font-size: 26px;
+}
+
+.old-freebie {
+  width: 80%;
+}
+  
+.begin-btn {
+  flex: 0 0 40px;
+  padding: 0px 20px;
+  margin-top: 50px;
+  font-size: 14px;
+}
+  
+.sponsor {
+  background-size: 40px;
+  width: auto;
+  height: 70px;
+  bottom: 20px;
+  font-size: 14px;
+}
+
+.app-window {
+  font-size: 12px;
+} 
+  
+.voter-registration > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 10px 10px 10px;
+  flex: 0 0 auto;
+  min-width: 192px;
+}
+  
+.voter-registration > div > div{
+  width: 100%;
+}   
+
+.voter-registration h1 {
+  font-size: 12px;
+  flex: 0 0 20px;
+  width: auto;
+  margin-right: 0px;
+  padding-left: 0px;
+}
+
+.voter-registration input {
+  margin-left: 0px;
+  width: 20vw;
+  min-width: 100px;
+}
+  
+.radio-field input {
+  margin-left: 6px;  
+}
+  
+.name-field {
+  width: 100%;
+  display: flex;
+}
+  
+.birth-field {
+  width: 100%;
+  display: flex;
+}
+  
+.phone-field {
+  width: 100%;
+  display: flex;
+}  
+
+.voter-registration .address-field {
+  width: 100%;
+  display: inline;
+  margin-left: 0px;
+}
+  
+.voter-registration .ssn-field {
+  margin-left: 0px;
+  width: 100%;
+  display: flex;
+}
+
+.radio-field {
+  margin: 5px 0px;
+}
+
+.submit-btn {
+  width: auto;
+  height: 40px;
+  margin: 25px 0px;
+  padding: 0px 40px;
+  font-size: 14px;
+}
+  
+.political-party .radio-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+  
+.political-party input {
+  margin-left: 0px;
+}
+
+.voter-name {
+  font-size: 16px;
+}
+
+.voter-address {
+  font-size: 16px;
+}
+
+.birth-info {
+  flex-direction: column;
+}
+
+.birth-info div {
+  padding-right: 0px;
+}  
+  
 }
 ```
