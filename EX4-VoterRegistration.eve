@@ -211,7 +211,7 @@ This page gives an administrator an overview of all the Earthicans who have regi
 search @session @browser
   [#app-window target:"Summary"]
   window = [#div class:"app-window"]
-  voter = [#voter voter-id children: [#data question answer]]
+  voter = [#voter]
 
 bind @browser
   window.children += [#voter-card voter]
