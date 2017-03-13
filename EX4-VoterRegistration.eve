@@ -144,15 +144,6 @@ commit
 
 ```
 
-
-```
-search
-  [#voter first-name last-name]
-  
-bind @browser
-  [#div text: "{{first-name}} {{last-name}}"]
-```
-
 ### Gender Options
 
 Technically this question susses out both one's gender and organic life versus robot status, and the end result is the need for a list of genders rather than a binary option. Instead of adding these manually in the voter registration page layout, I've made a list here, open to any additional genders that need to be added. Any gender on this list will get added to the voter registration page, which gets sorted by the `order` attribute.
@@ -227,11 +218,16 @@ search @session @browser
   voter = [#voter voter-id first-name last-name birthday gender address party ssn]
   phone = if voter.phone then "Phone: {{voter.phone}}"
           else ""
+  address2 = if address.address2 then " {{address.address2}} "
+             else " "
+  middle-name = if voter.middle-name then " {{voter.middle-name}} "
+                else " "
 
 bind @browser
   voter-card <- [#div class:"voter-card" children:
-  [#div class:"voter-name" text: "{{first-name}} {{last-name}}"]
+  [#div class:"voter-name" text: "{{first-name}}{{middle-name}}{{last-name}}"]
     [#div class:"birth-info" children:
+      [#div class:"voter-address" text: "{{address.address1}}{{address2}}{{address.city}} {{address.state}} {{address.zip}}"]
       [#div class:"voter-birth" text:"Born: {{birthday}}"]
       [#div class:"voter-sex" text:"Gender: {{gender}}"]
       [#div class:"voter-phone" text:phone]
@@ -261,7 +257,7 @@ commit
   
   [#voter voter-id:7192
     first-name: "Hubert"
-    middle-name: "J"
+    middle-name: "J."
     last-name: "Farnsworth"
     birthday: "04-09-2841"
     gender: "male"
@@ -300,7 +296,7 @@ commit
     party: "People for the Ethical Treatment of Humans"
     address: [address1: "The dumpster behind 650 W 57th St" city: "New New York" state: "NY" zip: "10036"]]
     
-  [#voter voter-id:8432 children:
+  [#voter voter-id:8432
     first-name: "Hermes" 
     last-name: "Conrad"
     birthday: "07-15-2959"
