@@ -225,6 +225,8 @@ Each voter gets a #`voter-card` in the browser, and this block inject that with 
 search @session @browser
   voter-card = [#voter-card voter]
   voter = [#voter voter-id first-name last-name birthday gender address party ssn]
+  phone = if voter.phone then "Phone: {{voter.phone}}"
+          else ""
 
 bind @browser
   voter-card <- [#div class:"voter-card" children:
@@ -232,6 +234,7 @@ bind @browser
     [#div class:"birth-info" children:
       [#div class:"voter-birth" text:"Born: {{birthday}}"]
       [#div class:"voter-sex" text:"Gender: {{gender}}"]
+      [#div class:"voter-phone" text:phone]
       [#div class:"voter-ssn" text:"SSN: XXX-XX-{{ssn}}"]
     ]
     [#div class:"voter-party" text:"Affiliation: {{party}}"]
@@ -248,6 +251,7 @@ Here's a few registered voters to help populate the Summary page.
 commit
   [#voter voter-id:7362
    first-name: "Philip"
+   middle-name: "J."
    last-name: "Fry"
    birthday: "08-14-1974"
    gender: "male"
@@ -255,89 +259,65 @@ commit
    party: "Voter Apathy Party"
    address: [address1: "620 W 42nd St" address2: "Apt 00100100" city: "New New York" state: "NY" zip: "10036"]]
   
-  [#voter voter-id:7192 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"Hubert J. Farnsworth"]
-    [#data question:"Birthday" answer:"04-09-2841"]
-    [#data question:"Sex" answer:"Male"]
-    [#data question:"Phone Number" answer:"212-399-0371"]
-    [#data question:"Address" answer:"650 W 57th St, New New York, NY 10019"]
-    [#data question:"Last four digits of your Social Security number" answer:"2458"]
-    [#data question:"Party" answer:"National Ray-Gun Association"]
-  ]
+  [#voter voter-id:7192
+    first-name: "Hubert"
+    middle-name: "J"
+    last-name: "Farnsworth"
+    birthday: "04-09-2841"
+    gender: "male"
+    phone: "04-09-2841"
+    ssn: "2458"
+    party: "National Ray-Gun Association"
+    address: [address1: "650 W 57th S." city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:9253 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"Turanga Leela"]
-    [#data question:"Birthday" answer:"07-29-2975"]
-    [#data question:"Sex" answer:"Female"]
-    [#data question:"Phone Number" answer:"212-307-7760"]
-    [#data question:"Address" answer:"715 9th Ave, Apt 1I, New New York, NY 10019"]
-    [#data question:"Last four digits of your Social Security number" answer:"3001"]
-    [#data question:"Party" answer:"No party"]
-  ]
+  [#voter voter-id:9253
+    first-name: "Turanga" 
+    last-name: "Leela"
+    birthday: "07-29-2975"
+    gender: "Female"
+    phone: "212-307-7760"
+    ssn: "3001"
+    party: "No party"
+    address: [address1: "715 9th Ave" address2: "Apt 1I" city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:1298 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"yes"]
-    [#data question:"Name" answer:"Bender Bending Rodriguez"]
-    [#data question:"Birthday" answer:"01-02-2996"]
-    [#data question:"Sex" answer:"Manbot"]
-    [#data question:"Phone Number" answer:""]
-    [#data question:"Address" answer:"620 W 42nd St, Apt 00100100, New New York, NY 10036"]
-    [#data question:"Last four digits of your Social Security number" answer:"BU22"]
-    [#data question:"Party" answer:"No party"]
-  ]
+  [#voter voter-id:1298 
+    first-name: "Bender"
+    middle-name: "Bending"
+    last-name: "Rodriguez"
+    birthday: "01-02-2996"
+    gender: "Manbot"
+    party: "No party"
+    ssn: "BU22"
+    address: [address1: "620 W 42nd St" address2: "Apt 00100100" city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:1782 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"John A. Zoidberg"]
-    [#data question:"Birthday" answer:"05-05-2914"]
-    [#data question:"Sex" answer:"Male"]
-    [#data question:"Phone Number" answer:""]
-    [#data question:"Address" answer:"The dumpster behind 650 W 57th St, New New York, NY 10019"]
-    [#data question:"Last four digits of your Social Security number" answer:"DXC7"]
-    [#data question:"Party" answer:"People for the Ethical Treatment of Humans"]
-  ]
-
+  [#voter voter-id:1782
+    first-name: "John"
+    middle-name: "A."
+    last-name: "Zoidberg"
+    birthday: "05-05-2914"
+    gender: "Male"
+    ssn: "DXC7"
+    party: "People for the Ethical Treatment of Humans"
+    address: [address1: "The dumpster behind 650 W 57th St" city: "New New York" state: "NY" zip: "10036"]]
+    
   [#voter voter-id:8432 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"Hermes Conrad"]
-    [#data question:"Birthday" answer:"07-15-2959"]
-    [#data question:"Sex" answer:"Male"]
-    [#data question:"Phone Number" answer:""]
-    [#data question:"Address" answer:"105 Duane St, Apt 3007, New New York, NY 10007"]
-    [#data question:"Last four digits of your Social Security number" answer:"6789"]
-    [#data question:"Party" answer:"Brain Slug Party"]
-  ]
+    first-name: "Hermes" 
+    last-name: "Conrad"
+    birthday: "07-15-2959"
+    gender: "Male"
+    ssn: "6789"
+    party: "Brain Slug Party"
+    address: [address1: "105 Duane St" address2: "Apt 3007" city: "New New York" state: "NY" zip: "10007"]]
 
-  [#voter voter-id:6643 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"Amy Wong"]
-    [#data question:"Birthday" answer:"05-04-2978"]
-    [#data question:"Sex" answer:"Female"]
-    [#data question:"Phone Number" answer:"212-995-8833"]
-    [#data question:"Address" answer:"10 West St, New New York, NY 10004"]
-    [#data question:"Last four digits of your Social Security number" answer:"5523"]
-    [#data question:"Party" answer:"Dudes for the Legalization of Hemp"]
-  ]
-
-  [#voter voter-id:2318 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"I. C. Wiener"]
-    [#data question:"Birthday" answer:"12-31-1999"]
-    [#data question:"Sex" answer:"Male"]
-    [#data question:"Phone Number" answer:"212-555-1221"]
-    [#data question:"Address" answer:"405 W 43rd St, New New York, NY 10036"]
-    [#data question:"Last four digits of your Social Security number" answer:"3000"]
-    [#data question:"Party" answer:"Antisocialists"]
-  ]
+  [#voter voter-id:6643 
+    first-name: "Amy"
+    last-name: "Wong"
+    birthday: "05-04-2978"
+    gender: "Female"
+    phone: "212-995-8833"
+    ssn: "5523"
+    party: "Dudes for the Legalization of Hemp"
+    address: [address1: "10 West St." city: "New New York" state: "NY" zip: "10007"]]
 ```
 
 ### A Custom Form Element
