@@ -54,7 +54,7 @@ This commits a record called #`app-window` whose attribute `target` specifies wh
 
 ```
 commit
-  [#app-window target:"Register"]
+  [#app-window target:"Start"]
 
 ```
 ## Start Page
@@ -90,25 +90,25 @@ search @session @browser
 bind @browser
   window.class += "voter-registration"
   window <- [children: 
-  [#form name: "Voter Registration" options: [reset: true] sections: 
+  [#form name: "Voter Registration" sections: 
   
     [#section sort: 1 name: "Qualifications" fields: 
-      [#field #required sort: 1 type: "radio" label: "Citizenship" field: "citizenship" options:   
-        [label: "Citizen"]
-        [label: "Permanent Resident"]
-        [label: "Resident Alien"]]
+      [#field #required sort: 1 type: "radio" label: "Are you a citizen?" field: "citizenship" options:   
+        [label: "Yes"]
+        [label: "No"]]
       [#field #required sort: 2 type: "radio" label: "Have you been convicted of a felony?" field: "felony" options: 
         [label: "Yes"]
         [label: "No"]]]
   
   [#section sort: 2 name: "Personal Information" fields:
     [#field #required sort: 1 type: "input" label: "First Name" field: "first-name"]
-    [#field #required sort: 2 type: "input" label: "Last Name" field: "last-name"]
-    [#field #required sort: 3 type: "input" label: "Birthday" field: "birthday" placeholder:"MM-DD-YYYY"]
-    [#field #required sort: 4 type: "radio" label: "Gender" field: "gender" options: 
+    [#field sort: 2 type: "input" label: "Middle Name" field: "middle-name"]
+    [#field #required sort: 3 type: "input" label: "Last Name" field: "last-name"]
+    [#field #required sort: 4 type: "input" label: "Birthday" field: "birthday" placeholder:"MM-DD-YYYY"]
+    [#field #required sort: 5 type: "radio" label: "Gender" field: "gender" options: 
       [label: gender-name]]
-    [#field sort: 5 type: "input" label:"Phone Number" field: "phone" placeholder:"XXX-XXX-XXXX"]
-    [#field #required sort: 6 type: "input" label:"Last 4 Digits of SSN" field: "ssn" placeholder:"XXXX"]
+    [#field sort: 6 type: "input" label:"Phone Number" field: "phone" placeholder:"XXX-XXX-XXXX"]
+    [#field #required sort: 7 type: "input" label:"Last 4 Digits of SSN" field: "ssn" placeholder:"XXXX"]
   ]
   
   [#section sort: 3 name: "Address" fields: 
@@ -124,27 +124,58 @@ bind @browser
     [label: party-name]
   ]
   
-  
   ]
           
 ]]
 ```
 
-Handle voter registration submission
+This listens for a new submission on the registration form, and creates a new #voter record with the submitted information.
 
 ```
-search @browser
-  [#form name: "Voter Registration" submission: [citizenship felony first-name last-name birthday gender phone ssn address1 address2 city state zip party]]
+search @browser @session
+  window = [#app-window]
+  [#form name: "Voter Registration" submission: s]
   
-  citizenship = "Citizen"
-  felony = "No"
-  
+  middle-name  = if s.middle-name then s.middle-name else ""
+  phone  = if sphone then s.phone else ""
+  address2 = if s.address2 then s.address2 else ""
+         
+  s.citizenship = "Yes"
+  s.felony = "No"
+
 commit
-  [#voter first-name last-name phone ssn gender address: [address1 address2 city state zip]]
-
+  window.target := "Submission"
+  window.voter := voter
+  voter = [#voter 
+    first-name: s.first-name 
+    middle-name 
+    last-name: s.last-name
+    birthday: s.birthday
+    ssn: s.ssn
+    phone
+    gender: s.gender 
+    party: s.party
+   address: [
+    address1: s.address1 
+    address2 
+    city: s.city
+    state: s.state
+    zip: s.zip]]
 ```
 
-### Gender Options
+After submitting a registrations, the user is shown a summary registration card
+
+```
+search @session @browser
+  [#app-window target:"Submission" voter]
+  window = [#div class:"app-window"]
+  
+bind @browser
+  window.children += [#voter-card voter]
+```
+
+
+Gender options
 
 Technically this question susses out both one's gender and organic life versus robot status, and the end result is the need for a list of genders rather than a binary option. Instead of adding these manually in the voter registration page layout, I've made a list here, open to any additional genders that need to be added. Any gender on this list will get added to the voter registration page, which gets sorted by the `order` attribute.
 
@@ -180,22 +211,11 @@ commit
 
 ### Committing a New Voter Record
 
-This listens for a click event on the #`submit` button and then creates a new #`voter` record with the information contained in the registration form. Since every #`input` field has a `question` attribute by default, I search for that, but for the corresponding answer set to `form-value`, I check to see if there's even anything typed into that field. If there is then that answer gets committed, but otherwise an empty string is stored. Radio buttons are also specifically asked for because their namespaces are a little different. All of the questions and answers get committed to a new #`voter` record, which is also assigned a unique attribute in `voter-id` to guarantee unique records (which is important to make sure each registration page submission generates its own unique voter).
 
-```eve
-search @session @browser @event
-  [#click element: [#submit]]
-  form = [#input question]
-  form-value = if form.value then form.value else ""
-  radio = [#input type:"radio" name value checked:true]
-  window = [#app-window]
-  id = if c = count[given:[#voter]] then c + 1 else 1
 
-commit
-  [#voter voter-id:id children: [#data question:form.question answer:form-value] [#data question:radio.name answer:radio.value]]
-```
 
-## Summary Page
+
+Summary Page
 
 This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a #`voter-card` for each #`voter` record. The layout for what the #`voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
 
@@ -203,8 +223,8 @@ This page gives an administrator an overview of all the Earthicans who have regi
 search @session @browser
   [#app-window target:"Summary"]
   window = [#div class:"app-window"]
-  voter = [#voter]
-
+  voter = [#voter]  
+  
 bind @browser
   window.children += [#voter-card voter]
 ```
@@ -216,26 +236,22 @@ Each voter gets a #`voter-card` in the browser, and this block inject that with 
 ```
 search @session @browser
   voter-card = [#voter-card voter]
-  voter = [#voter voter-id first-name last-name birthday gender address party ssn]
-  phone = if voter.phone then "Phone: {{voter.phone}}"
-          else ""
-  address2 = if address.address2 then " {{address.address2}} "
-             else " "
-  middle-name = if voter.middle-name then " {{voter.middle-name}} "
-                else " "
+  voter = [#voter first-name last-name birthday gender ssn party address]
+  phone = if voter.phone then "Phone: {{voter.phone}}" else ""
+  address2 = if address.address2 then " {{address.address2}} " else " "
+  middle-name = if voter.middle-name then " {{voter.middle-name}} " else " "
 
 bind @browser
   voter-card <- [#div class:"voter-card" children:
-  [#div class:"voter-name" text: "{{first-name}}{{middle-name}}{{last-name}}"]
+    [#div class:"voter-name" text: "{{first-name}}{{middle-name}}{{last-name}}"]
     [#div class:"birth-info" children:
       [#div class:"voter-address" text: "{{address.address1}}{{address2}}{{address.city}} {{address.state}} {{address.zip}}"]
       [#div class:"voter-birth" text:"Born: {{birthday}}"]
       [#div class:"voter-sex" text:"Gender: {{gender}}"]
       [#div class:"voter-phone" text:phone]
-      [#div class:"voter-ssn" text:"SSN: XXX-XX-{{ssn}}"]
-    ]
-    [#div class:"voter-party" text:"Affiliation: {{party}}"]
-  ]
+      [#div class:"voter-ssn" text:"SSN: XXX-XX-{{ssn}}"]]
+    [#div class:"voter-party" text:"Affiliation: {{party}}"]]
+  
 ```
 
 ## Appendix
@@ -246,7 +262,7 @@ Here's a few registered voters to help populate the Summary page.
 
 ```eve
 commit
-  [#voter voter-id:7362
+  [#voter
    first-name: "Philip"
    middle-name: "J."
    last-name: "Fry"
@@ -256,9 +272,9 @@ commit
    party: "Voter Apathy Party"
    address: [address1: "620 W 42nd St" address2: "Apt 00100100" city: "New New York" state: "NY" zip: "10036"]]
   
-  [#voter voter-id:7192
+  [#voter
     first-name: "Hubert"
-    middle-name: "J"
+    middle-name: "J."
     last-name: "Farnsworth"
     birthday: "04-09-2841"
     gender: "male"
@@ -267,7 +283,7 @@ commit
     party: "National Ray-Gun Association"
     address: [address1: "650 W 57th S." city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:9253
+  [#voter
     first-name: "Turanga" 
     last-name: "Leela"
     birthday: "07-29-2975"
@@ -277,7 +293,7 @@ commit
     party: "No party"
     address: [address1: "715 9th Ave" address2: "Apt 1I" city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:1298 
+  [#voter 
     first-name: "Bender"
     middle-name: "Bending"
     last-name: "Rodriguez"
@@ -287,7 +303,7 @@ commit
     ssn: "BU22"
     address: [address1: "620 W 42nd St" address2: "Apt 00100100" city: "New New York" state: "NY" zip: "10036"]]
 
-  [#voter voter-id:1782
+  [#voter
     first-name: "John"
     middle-name: "A."
     last-name: "Zoidberg"
@@ -297,7 +313,7 @@ commit
     party: "People for the Ethical Treatment of Humans"
     address: [address1: "The dumpster behind 650 W 57th St" city: "New New York" state: "NY" zip: "10036"]]
     
-  [#voter voter-id:8432
+  [#voter
     first-name: "Hermes" 
     last-name: "Conrad"
     birthday: "07-15-2959"
@@ -306,7 +322,7 @@ commit
     party: "Brain Slug Party"
     address: [address1: "105 Duane St" address2: "Apt 3007" city: "New New York" state: "NY" zip: "10007"]]
 
-  [#voter voter-id:6643 
+  [#voter 
     first-name: "Amy"
     last-name: "Wong"
     birthday: "05-04-2978"
@@ -418,10 +434,21 @@ Add the #required tag to required input fields
 ```eve
 search @browser
   field = [#field #required]
-  input = [#input not(#required)]
+  input = [#input not(#required) field type: "input"]
   
 commit @browser
   input += #required
+```
+
+Add required tag to radio fields
+
+```
+search @browser
+  field = [#field #required]
+  input = [#radio not(#required) field]
+  
+commit @browser
+  input += #required  
 ```
 
 If an input is #required, but has no value, then post a message stating to fill in all required fields.
@@ -430,13 +457,36 @@ If an input is #required, but has no value, then post a message stating to fill 
 search @browser @event
   [#click element: [#button #submit form]]
   required-fields = [#input #required type: "input" field]
-  form-message = [#form-message form]
   not(required-fields.value)
+  field-label = [#h3 field]
   
 commit @browser
-  form-message.children += [#div text: "Please fill out all required fields"]
+  field-label.class += "required-field"
 ```
 
+Do the same for radio buttons
+
+```eve
+search @browser @event
+  [#click element: [#button #submit form]]
+  required-fields = [#radio #required field]
+  not(required-fields.value)
+  field-label = [#h3 field]
+  
+commit @browser
+  field-label.class += "required-field"
+```
+
+Display a message at the top if any fields are required but missing
+
+```
+search @browser
+  [#h3 class: "required-field"]
+  form-message = [#form-message form]
+  
+bind @browser
+  form-message.children += [#div class: "error-message" text: "Please fill out all required fields"]
+```
 
 Custom Input Types
 
@@ -448,12 +498,23 @@ search @browser
   field.type = "radio"
 
 bind @browser
-  field-display.children += [#div children: 
+  field-display.children += [#div #radio field children: 
     [#h3 field text: field.label]
     [#div option: field.options children: 
       [#div class: "radio-label" text: field.options.label]
       [#input class: "radio-button" field form type: "radio" name: field.field value: field.options.label]]
   ]
+```
+
+Bind the clicked value to the radio div
+
+```
+search @browser
+  [#input type: "radio" checked: true field value]
+  radio-div = [#div #radio field]
+  
+bind @browser
+  radio-div.value := value
 ```
 
 Submit radio options
@@ -477,8 +538,6 @@ search @browser
   placeholder = if field.placeholder then field.placeholder
                 else ""
 
-  
-  
 bind @browser
   field-display.children += [#div children: 
     [#h3 field text: field.label]
@@ -543,6 +602,17 @@ This app needs a good amount of CSS to style the layout of the registration form
  width: 350px; 
  border-radius: 5px;
  padding: 5px;
+}
+
+.error-message {
+ background-color: 	#FA8072; 
+ padding: 10px;
+ color: white;
+ font-size: 16px;
+}
+
+.required-field {
+  color: red;
 }
 ```
 
