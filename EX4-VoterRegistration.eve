@@ -1,13 +1,13 @@
 # New New York Voting Registration
-```css
-{for a good time, leave this here}
-```
 
 ## What is this?
+
 This example demonstrates how to capture input from forms and create and explore records from that. It should also provide a look at some of the particular complications and pitfalls in dealing with forms. In the future it'll most likely be useful to address a more complicated version of forms, but for now this is a good starting point to develop an intuition of the concepts. If anything seems oversimplified or susceptible to edge cases and user error, it's most likely from the effort to avoid bugs and overly complicated layouts.
 
 ## Page Layout
+
 ### Containers
+
 This one's pretty simple; I want a nav bar at the top to let me manually go to the different pages, and an app window where those pages are rendered.
 
 ```
@@ -54,10 +54,11 @@ This commits a record called #`app-window` whose attribute `target` specifies wh
 
 ```
 commit
-  [#app-window target:"Start"]
+  [#app-window target:"Register"]
 
 ```
 ## Start Page
+
 The starting page isn't very complicated - it contains a thank you message for the civically engaged Earthicans, the flag of Earth, a button to start a new registration for another voter, and a subtle sponsorship message.
 
 ```
@@ -76,6 +77,7 @@ bind @browser
 ```
 
 ## Voter Registration Page
+
 Holy text wall Batman. So it turns out the voter registration page is a little verbose, far more than most of what I write in Eve. This one was tricky because even with a pretty minimal number of questions, the layout quickly became complicated, not to mention capturing and organizing all the data to be committed. As many reusable parts as possible were used on this page, with #`qualify-test` designating yes/no questions that determine your eligibility to vote, #`field` designating standard text input questions, and `radio` input buttons designating the "pick one" questions. The first two get both their content and shape specified in subsequent blocks, and the last has its general shape defined here with subsequent blocks to populate those lists. It's tough to homogenize something like this, especially with all the one-offs. Some of the forms need a character limit, like phone number or birthday. The radio buttons for the political parties needed a special button at the end to choose if you have no political affiliation, and radio buttons in general differ from the other #`input` blocks in terms of their namespace.
 
 ```
@@ -87,106 +89,72 @@ search @session @browser
 
 bind @browser
   window.class += "voter-registration"
-  window <- [children:
-
-    [#div class:"qualifications" children:
-      [#h1 class:"segment-title" text:"Qualifications"]
-      [#div children:
-        [#div #qualify-test name:"citizen" text:"Are you a citizen of Planet Earth?"]
-        [#div #qualify-test name:"felon" text:"Are you a convicted felon?"]
-      ]
-    ]
-
-    [#div class:"your-name" children:
-      [#h1 class:"segment-title" text: "Your name"]
-      [#div children:
-        [#field class:"name-field" question:"Name"]
-      ]
-    ]
-
-    [#div class:"personal-info" children:
-      [#h1 text:"More information"]
-      [#div children:
-        [#field class:"birth-field" length:10 question:"Birthday" placeholder:"MM-DD-YYYY"]
-        [#div class:"gender-field" children:
-          [#div text:"Sex"]
-          [#div children:
-            [#div gender-name text:gender-name class:"radio-field" sort:order children:
-              [#input type:"radio" name:"Sex" value:gender-name]
-            ]
-          ]
-        ]
-        [#field class:"phone-field" length:12 question:"Phone Number" placeholder:"XXX-XXX-XXXX"]
-      ]
-    ]
-
-    [#div class:"home-address" children:
-      [#h1 text:"The address where you live"]
-      [#div children:
-        [#field class:"address-field" question:"Address" placeholder:"Street Address, Apt. Number (if applicable), City/Town/Village Zip Code"]
-      ]
-    ]
-
-    [#div class:"identification" children:
-      [#h1 text:"Identification"]
-      [#div children:
-        [#field class:"ssn-field" length:4 question:"Last four digits of your Social Security number"]
-      ]
-    ]
-
-    [#div class:"political-party" children:
-      [#h1 text:"Political Party"]
-      [#div children:
-        [#div class:"radio-field" sort:priority text:party-name party-name children:
-          [#input type:"radio" name:"Party" value:party-name]
-        ]
-        [#div class:"radio-field" text:"I do not wish to enroll in a party" sort:999 children:
-          [#input #no-party type:"radio" name:"Party" value:"No party"]
-        ]
-      ]
-    ]
-
-    [#button #submit class:"submit-btn" target:"Start" text:"Submit"]
-]
+  window <- [children: 
+  [#form name: "Voter Registration" options: [reset: true] sections: 
+  
+    [#section sort: 1 name: "Qualifications" fields: 
+      [#field #required sort: 1 type: "radio" label: "Citizenship" field: "citizenship" options:   
+        [label: "Citizen"]
+        [label: "Permanent Resident"]
+        [label: "Resident Alien"]]
+      [#field #required sort: 2 type: "radio" label: "Have you been convicted of a felony?" field: "felony" options: 
+        [label: "Yes"]
+        [label: "No"]]]
+  
+  [#section sort: 2 name: "Personal Information" fields:
+    [#field #required sort: 1 type: "input" label: "First Name" field: "first-name"]
+    [#field #required sort: 2 type: "input" label: "Last Name" field: "last-name"]
+    [#field #required sort: 3 type: "input" label: "Birthday" field: "birthday" placeholder:"MM-DD-YYYY"]
+    [#field #required sort: 4 type: "radio" label: "Gender" field: "gender" options: 
+      [label: gender-name]]
+    [#field sort: 5 type: "input" label:"Phone Number" field: "phone" placeholder:"XXX-XXX-XXXX"]
+    [#field #required sort: 6 type: "input" label:"Last 4 Digits of SSN" field: "ssn" placeholder:"XXXX"]
+  ]
+  
+  [#section sort: 3 name: "Address" fields: 
+    [#field #required sort: 1 type: "input" label: "Address Line 1" field: "address1"]
+    [#field sort: 2 type: "input" label: "Address Line 2" field: "address2"]
+    [#field #required sort: 3 type: "input" label: "City" field: "city"]
+    [#field #required sort: 4 type: "input" label: "State" field: "state"]
+    [#field #required sort: 5 type: "input" label: "Zip" field: "zip"]
+  ]
+  
+  [#section sort: 4 name: "Political Affiliation" fields: 
+    [#field #required sort: 1 type: "radio" label: "Of which party are you a member?" field: "party" options:
+    [label: party-name]
+  ]
+  
+  
+  ]
+          
+]]
 ```
 
-### Binary Radio Buttons
-The qualification questions (in the current case, citizenship and criminal status) that appear in the registration form are tagged #`qualify-test` and need text to say yes and no with radio buttons next to each.
+Handle voter registration submission
 
 ```
 search @browser
-  test = [#qualify-test name]
-
-bind @browser
-  test <- [children:
-    [#div class:"radio-field" text:"Yes" children:
-      [#input type:"radio" name value:"yes"]]
-    [#div class:"radio-field" text:"No" children:
-        [#input type:"radio" name value:"no"]]
-   ]
+  [#form name: "Voter Registration" submission: [citizenship felony first-name last-name birthday gender phone ssn address1 address2 city state zip party]]
+  
+  citizenship = "Citizen"
+  felony = "No"
+  
+commit
+  [#voter first-name last-name phone ssn gender address: [address1 address2 city state zip]]
 
 ```
-### Text Input Fields
-The questions that require the standard #`input` form are tagged as #`field` and get handled here. This finds those records and injects the content into the browser, preserving the `placeholder`, `class`, and `maxlength` properties and passing them on to their appropriate elements.
+
 
 ```
-search @browser
-  field = [#field question]
-  placeholder-text = if field.placeholder then field.placeholder
-                     else ""
-  field-class = if field.class then field.class
-                else "regular-field"
-  maxlength = if field.length then field.length
-              else ""
-
+search
+  [#voter first-name last-name]
+  
 bind @browser
-  field += #div
-  field.children +=
-    [#div text:question children:
-    [#input class:field-class maxlength question placeholder:placeholder-text]]
+  [#div text: "{{first-name}} {{last-name}}"]
 ```
 
 ### Gender Options
+
 Technically this question susses out both one's gender and organic life versus robot status, and the end result is the need for a list of genders rather than a binary option. Instead of adding these manually in the voter registration page layout, I've made a list here, open to any additional genders that need to be added. Any gender on this list will get added to the voter registration page, which gets sorted by the `order` attribute.
 
 ```
@@ -198,6 +166,7 @@ commit
 ```
 
 ### Political Party Options
+
 While the Tastycrats and Fingerlicans are the primary parties, there are many third parties to choose from, and they all get listed here. Again, this makes it easy to add or remove political parties without having to mess around with the voter registration page.
 
 ```
@@ -218,6 +187,7 @@ commit
 ```
 
 ### Committing a New Voter Record
+
 This listens for a click event on the #`submit` button and then creates a new #`voter` record with the information contained in the registration form. Since every #`input` field has a `question` attribute by default, I search for that, but for the corresponding answer set to `form-value`, I check to see if there's even anything typed into that field. If there is then that answer gets committed, but otherwise an empty string is stored. Radio buttons are also specifically asked for because their namespaces are a little different. All of the questions and answers get committed to a new #`voter` record, which is also assigned a unique attribute in `voter-id` to guarantee unique records (which is important to make sure each registration page submission generates its own unique voter).
 
 ```eve
@@ -234,64 +204,57 @@ commit
 ```
 
 ## Summary Page
+
 This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a #`voter-card` for each #`voter` record. The layout for what the #`voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
 
 ```eve
 search @session @browser
   [#app-window target:"Summary"]
   window = [#div class:"app-window"]
-  voter = [#voter voter-id children: [#data question answer]]
+  voter = [#voter]
 
 bind @browser
   window.children += [#voter-card voter]
 ```
 
 ### Voter Cards
+
 Each voter gets a #`voter-card` in the browser, and this block inject that with all of its content. It's worth noting again how verbose this section is, since each question on the registration form requires its own line in the search block. Originally I had intended to capture first name, middle name, and last name separately, as well as the street number, city, and zip code for address, but all of those different fields added up quickly and I was staring down the barrel of a 20-line search block. There are more complicated methods to deal with complex situations like that, and we'll have another example to show off functionality (perhaps an expanded version of this app), but for now, long-winded specificity is the cleanest way to achieve the goals of this example.
 
 ```
 search @session @browser
   voter-card = [#voter-card voter]
-  voter = [#voter voter-id children:[#data question:"citizen" answer:is-citizen]]
-  voter = [#voter voter-id children:[#data question:"felon" answer:is-felon]]
-  voter = [#voter voter-id children:[#data question:"Name" answer:voter-name]]
-  voter = [#voter voter-id children:[#data question:"Birthday" answer:voter-birth]]
-  voter = [#voter voter-id children:[#data question:"Sex" answer:voter-sex]]
-  voter = [#voter voter-id children:[#data question:"Phone Number" answer:voter-phone]]
-  voter = [#voter voter-id children:[#data question:"Address" answer:voter-address]]
-  voter = [#voter voter-id children:[#data question:"Last four digits of your Social Security number" answer:voter-ssn]]
-  voter = [#voter voter-id children:[#data question:"Party" answer:voter-party]]
+  voter = [#voter voter-id first-name last-name birthday gender address party ssn]
 
 bind @browser
   voter-card <- [#div class:"voter-card" children:
-    [#div class:"voter-name" text:voter-name]
-    [#div class:"voter-address" text:voter-address]
+  [#div class:"voter-name" text: "{{first-name}} {{last-name}}"]
     [#div class:"birth-info" children:
-      [#div class:"voter-birth" text:"Born: {{voter-birth}}"]
-      [#div class:"voter-sex" text:"Gender: {{voter-sex}}"]
-      [#div class:"voter-ssn" text:"SSN: XXX-XX-{{voter-ssn}}"]
+      [#div class:"voter-birth" text:"Born: {{birthday}}"]
+      [#div class:"voter-sex" text:"Gender: {{gender}}"]
+      [#div class:"voter-ssn" text:"SSN: XXX-XX-{{ssn}}"]
     ]
-    [#div class:"voter-phone" text:"Phone: {{voter-phone}}"]
-    [#div class:"voter-party" text:"Affiliation: {{voter-party}}"]
+    [#div class:"voter-party" text:"Affiliation: {{party}}"]
   ]
 ```
 
-## Sample Data
+## Appendix
+
+### Sample Data
+
 Here's a few registered voters to help populate the Summary page.
+
 ```eve
 commit
-  [#voter voter-id:7362 children:
-    [#data question:"citizen" answer:"yes"]
-    [#data question:"felon" answer:"no"]
-    [#data question:"Name" answer:"Philip J. Fry"]
-    [#data question:"Birthday" answer:"08-14-1974"]
-    [#data question:"Sex" answer:"Male"]
-    [#data question:"Phone Number" answer:""]
-    [#data question:"Address" answer:"620 W 42nd St, Apt 00100100, New New York, NY 10036"]
-    [#data question:"Last four digits of your Social Security number" answer:"0810"]
-    [#data question:"Party" answer:"Voter Apathy Party"]
-  ]
-
+  [#voter voter-id:7362
+   first-name: "Philip"
+   last-name: "Fry"
+   birthday: "08-14-1974"
+   gender: "male"
+   ssn: "0810"
+   party: "Voter Apathy Party"
+   address: [address1: "620 W 42nd St" address2: "Apt 00100100" city: "New New York" state: "NY" zip: "10036"]]
+  
   [#voter voter-id:7192 children:
     [#data question:"citizen" answer:"yes"]
     [#data question:"felon" answer:"no"]
@@ -377,8 +340,234 @@ commit
   ]
 ```
 
-## Styles
+### A Custom Form Element
+
+Forms have a title and one or more sections. Each section has an optional name, and contains one or more fields. Each field additionally has the input type of that field (input, radio button, drop down list, etc.).
+
+A form starts as a `#form` record.
+
+```eve
+search @browser
+  form = [#form]
+  
+bind @browser
+  form += #div
+  form.sort := 0
+  form.class := "form"
+  form.submission := []
+```
+
+Display the form name
+
+```eve
+search @browser
+  form = [#form]
+  
+bind @browser
+  form.children += [#div children:
+    [#h1 class: "form-name" sort: 0 text: form.name]
+    [#div #form-message form sort: 1 class: "form-message"]]
+
+```
+
+Display each section. To properly display sections, we need to add them to the children of the form.
+
+```eve
+search @browser
+  form = [#form sections]
+    
+bind @browser
+  form.children += [#div form section: sections class: "form-section" sort: sections.sort]
+  sections.form := form
+```
+
+If the section has a name, display it
+
+```eve
+search @browser
+  section-display = [#div section]
+  
+bind @browser
+  section-display.children += [#h2 class: "section-name" text: section.name, sort: 0]
+```
+
+Display the fields in each section. As we did with sections, to display fields we need to move them over to the children of the section display.
+
+```eve
+search @browser
+  section-display = [#div section]
+  field = section.fields
+  
+bind @browser
+  section-display.children += 
+    [#div #field field sort: field.sort form: section.form sort: 1]
+```
+
+Display a submit button at the end of the form
+
+```eve
+search @browser
+  form = [#form]
+  
+bind @browser
+  form.children += [#button #submit form sort: 100 text: "Submit"]
+```
+
+Forms can have an optional reset button, which clears the fields in the form
+
+```eve
+search @browser
+  form = [#form options: [reset: true]]
+  
+bind @browser
+  form.children += [#button #reset form sort: 101 text: "Reset"]
+```
+
+Clicking the reset button clears each field in the form
+
+```eve
+search @event @browser
+  [#click element: [#reset]]
+  field-container = [#div field form]
+    
+commit @browser
+  field-container.children.value := none
+```
+
+Handle form validation
+
+Add the #required tag to required input fields
+
+```eve
+search @browser
+  field = [#field #required]
+  input = [#input not(#required)]
+  
+commit @browser
+  input += #required
+```
+
+If an input is #required, but has no value, then post a message stating to fill in all required fields.
+
+```
+search @browser @event
+  [#click element: [#button #submit form]]
+  required-fields = [#input #required type: "input" field]
+  form-message = [#form-message form]
+  not(required-fields.value)
+  
+commit @browser
+  form-message.children += [#div text: "Please fill out all required fields"]
+```
+
+
+Custom Input Types
+
+Render radio buttons
+
+```
+search @browser
+  field-display = [#div #field field form]
+  field.type = "radio"
+
+bind @browser
+  field-display.children += [#div children: 
+    [#h3 field text: field.label]
+    [#div option: field.options children: 
+      [#div class: "radio-label" text: field.options.label]
+      [#input class: "radio-button" field form type: "radio" name: field.field value: field.options.label]]
+  ]
+```
+
+Submit radio options
+
+```
+search @browser @event @session
+  click = [#click element: [#submit form]]
+  form = [#form submission]
+  radio = [#input form type: "radio" checked: true name: key value]
+  
+bind @browser
+  lookup[record: submission, attribute: key, value]
+```
+
+Render input fields
+
+```
+search @browser
+  field-display = [#div #field field form]
+  field.type = "input"
+  placeholder = if field.placeholder then field.placeholder
+                else ""
+
+  
+  
+bind @browser
+  field-display.children += [#div children: 
+    [#h3 field text: field.label]
+    [#input class: "text-input" type: "input" form field name: field.field placeholder]
+  ]
+```
+
+Submit input value
+
+```
+search @browser @event @session
+  click = [#click element: [#submit form]]
+  form = [#form submission]
+  input = [#input type: "input" form field name: key value]
+
+bind @browser
+  lookup[record: submission, attribute: key, value]
+```
+
+Render password fields
+
+```eve
+search @browser
+  password = [#password]
+  
+bind @browser
+  password += #input
+  password.type := "password"
+  password.class := "password"
+```
+
+Render custom button styles
+
+```eve
+search @browser
+  button = [#button]
+  
+bind @browser
+  button.class += "button"
+```
+
+### Styles
+
 This app needs a good amount of CSS to style the layout of the registration form and the voter cards.
+
+```css
+{for a good time, leave this here}
+```
+
+```css
+.radio-label {
+ float: left;
+ font-size: 13px; 
+ width: 300px;
+}
+
+.radio-button {
+  width: 100px;
+}
+
+.text-input {
+ width: 350px; 
+ border-radius: 5px;
+ padding: 5px;
+}
+```
 
 ```css
 @font-face {
@@ -434,6 +623,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   text-transform: uppercase;
 }
 
+
 .sponsor {
   background: url(http://i.imgur.com/sWkxxNU.png) no-repeat;
   background-size: 60px;
@@ -466,7 +656,7 @@ This app needs a good amount of CSS to style the layout of the registration form
 }
 
 .voter-registration h1 {
-  font-size: 18px;
+  font-size: 80px;
   width: 150px;
   margin-right: 50px;
   padding-left: 20px;
@@ -603,18 +793,14 @@ This app needs a good amount of CSS to style the layout of the registration form
 }   
 
 .voter-registration h1 {
-  font-size: 12px;
+  font-size: 30px;
   flex: 0 0 20px;
   width: auto;
   margin-right: 0px;
   padding-left: 0px;
 }
 
-.voter-registration input {
-  margin-left: 0px;
-  width: 20vw;
-  min-width: 100px;
-}
+
   
 .radio-field input {
   margin-left: 6px;  
