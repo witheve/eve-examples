@@ -175,6 +175,7 @@ commit
   [#party party-name:"Rainbow Whigs" priority:11]
   [#party party-name:"Antisocialists" priority:12]
   [#party party-name:"Reform Party" priority:13]
+  [#party party-name:"No Party" priority:14]
 ```
 
 ### Committing a New Voter Record
@@ -257,7 +258,7 @@ commit
   
   [#voter voter-id:7192
     first-name: "Hubert"
-    middle-name: "J."
+    middle-name: "J"
     last-name: "Farnsworth"
     birthday: "04-09-2841"
     gender: "male"
