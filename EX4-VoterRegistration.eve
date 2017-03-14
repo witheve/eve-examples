@@ -54,7 +54,7 @@ This commits a record called #`app-window` whose attribute `target` specifies wh
 
 ```
 commit
-  [#app-window target: "Register"]
+  [#app-window target: "Start"]
 
 ```
 ## Start Page
@@ -105,7 +105,7 @@ Reveal the rest of the registration form only if the qualifications are met.Vote
 
 ```eve
 search @session @browser
-  [#app-window target:"Register"]
+  [#app-window target: "Register"]
   window = [#div class:"app-window"]
   [#party party-name priority]
   [#gender gender-name order]
@@ -155,18 +155,17 @@ bind @browser
 ```
 
 
-The form is marked #qualified if the qualifications are met
+The form is marked `#qualified` if the qualifications are met
 
 ```
 search @browser @session
   [#submission #valid form citizenship felony]
   form = [#form name: "Voter Registration"]
-  not(form = [#qualified])
-  
+    
   citizenship = "Yes"
   felony = "No"
   
-commit @browser
+bind @browser
   form += #qualified
 ```
 
@@ -178,9 +177,11 @@ search @browser @session
   submission = [#valid form first-name middle-name last-name birthday gender phone ssn address1 address2 city state zip party]
   window = [#app-window]
 
-commit
+commit @browser
   form -= #qualified
-  submission := none
+  form += #reset
+  
+commit @session
   window.target := "Submission"
   window.voter := voter
   voter = [#voter first-name middle-name last-name birthday ssn phone gender party address: [address1 address2 city state zip]]
@@ -201,7 +202,7 @@ bind @browser
 ```
 
 
-Gender options
+### Gender options
 
 Technically this question susses out both one's gender and organic life versus robot status, and the end result is the need for a list of genders rather than a binary option. Instead of adding these manually in the voter registration page layout, I've made a list here, open to any additional genders that need to be added. Any gender on this list will get added to the voter registration page, which gets sorted by the `order` attribute.
 
@@ -367,7 +368,6 @@ bind @browser
   form += #div
   form.sort := 0
   form.class := "form"
-  form.submission := []
 ```
 
 Display the form name
@@ -512,6 +512,17 @@ commit @browser
   submission += #valid
 ```
 
+**Reset the form**
+
+```
+search @browser
+  form = [#form #reset]
+  submission = [#submission form]
+
+commit @browser
+  form -= #reset
+  submission := none
+```
 
 **Custom Input Types**
 
@@ -596,10 +607,10 @@ Render custom button styles
 
 ```eve
 search @browser
-  button = [#button]
+  button = [#button form]
   
 bind @browser
-  button.class += "form-button"
+  button.class += "submit-btn"
 ```
 
 ### Styles
@@ -915,6 +926,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   margin: 25px 0px;
   padding: 0px 40px;
   font-size: 14px;
+  cursor: pointer;
 }
   
 .political-party .radio-field {
