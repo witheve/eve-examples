@@ -17,6 +17,7 @@ commit @browser
 ```
 
 ### Pages
+
 For every page I want, I make a record with an attribute of `target` to specify which each page is called.
 
 ```
@@ -27,6 +28,7 @@ commit
 ```
 
 ### Nav Bar Buttons
+
 By abstracting this step out, I can define all the pages I want as in the block before, and then here find those pages and create a button on the nav bar for each of them.
 
 ```
@@ -50,7 +52,8 @@ commit
 ```
 
 ### Starting Page
-This commits a record called #`app-window` whose attribute `target` specifies which page gets rendered. In this case, when the app starts up, I want the landing view to be the Start page.
+
+This commits a record called `#app-window` whose attribute `target` specifies which page gets rendered. In this case, when the app starts up, I want the landing view to be the Start page.
 
 ```
 commit
@@ -78,14 +81,12 @@ bind @browser
 
 ## Voter Registration Page
 
-Holy text wall Batman. So it turns out the voter registration page is a little verbose, far more than most of what I write in Eve. This one was tricky because even with a pretty minimal number of questions, the layout quickly became complicated, not to mention capturing and organizing all the data to be committed. As many reusable parts as possible were used on this page, with #`qualify-test` designating yes/no questions that determine your eligibility to vote, #`field` designating standard text input questions, and `radio` input buttons designating the "pick one" questions. The first two get both their content and shape specified in subsequent blocks, and the last has its general shape defined here with subsequent blocks to populate those lists. It's tough to homogenize something like this, especially with all the one-offs. Some of the forms need a character limit, like phone number or birthday. The radio buttons for the political parties needed a special button at the end to choose if you have no political affiliation, and radio buttons in general differ from the other #`input` blocks in terms of their namespace.
+The voter registration page starts with questions that determine the eligibility of a registrant to complete the form. A voter must be both a citizen, and not convicted of a felony. This block sets up the form, and posses those two questions. 
 
 ```
 search @session @browser
   [#app-window target:"Register"]
   window = [#div class:"app-window"]
- 
-  [#gender gender-name order]
 
 bind @browser
   window.class += "voter-registration"
@@ -101,7 +102,35 @@ bind @browser
         [label: "No"]]]]]
 ```
 
-Reveal the rest of the registration form only if the qualifications are met.Voters can only register if they are both citizens, and they don't have a felony conviction.
+If either of the qualifications are not met in the submission, then a message is displayed informing the registrant. We can access the from submission through a `#submission` record. The attributes of the submission map to the field attribute in each of the `#field` records of the form. Form submissions can be either `#valid`, meaning the submission contains all of the required fields; or `#invalid`, meaning the submission is missing some of the required fields. This gives you flexibility on how to handle form submissions.
+
+```
+search @browser @session
+  [#submission #valid form citizenship felony]
+  form = [#form name: "Voter Registration"]
+  not(form = [#qualified])
+  
+  disqualified = if citizenship != "Yes" then "disqualified"
+                 else if felony != "No" then "disqualified"
+
+  form-message = [#form-message form]
+  
+bind @browser
+  form-message.children += [#div class: "error-message" text: "Sorry, you are not qualified to register to vote"]
+```
+
+The form is `#qualified` if the qualifications are met.
+
+```
+search @browser @session
+  [#submission #valid form citizenship: "Yes" felony: "No"]
+  form = [#form name: "Voter Registration"]
+
+bind @browser
+  form += #qualified
+```
+
+When the registrant is deemed qualified, the rest of the voter registration form is revealed. This is done by attaching additional sections to the already exiting form, defined above.
 
 ```eve
 search @session @browser
@@ -137,38 +166,6 @@ bind @browser
     [label: party-name]]])
 ```
 
-If either of the qualifications are not met, then a message is displayed informing the registrant.
-
-```
-search @browser @session
-  [#submission #valid form citizenship felony]
-  form = [#form name: "Voter Registration"]
-  not(form = [#qualified])
-  
-  disqualified = if citizenship != "Yes" then "disqualified"
-                 else if felony != "No" then "disqualified"
-
-  form-message = [#form-message form]
-  
-bind @browser
-  form-message.children += [#div class: "error-message" text: "Sorry, you are not qualified to register to vote"]
-```
-
-
-The form is marked `#qualified` if the qualifications are met
-
-```
-search @browser @session
-  [#submission #valid form citizenship felony]
-  form = [#form name: "Voter Registration"]
-    
-  citizenship = "Yes"
-  felony = "No"
-  
-bind @browser
-  form += #qualified
-```
-
 This listens for a new submission on the registration form, and creates a new #voter record with the submitted information.
 
 ```eve
@@ -177,28 +174,30 @@ search @browser @session
   submission = [#valid form first-name middle-name last-name birthday gender phone ssn address1 address2 city state zip party]
   window = [#app-window]
 
+// Reset the form for a new submission
 commit @browser
   form -= #qualified
   form += #reset
-  
+
+// Save the submission as a new voter record, and change the page to a submission summary page
 commit @session
   window.target := "Submission"
   window.voter := voter
   voter = [#voter first-name middle-name last-name birthday ssn phone gender party address: [address1 address2 city state zip]]
 ```
 
-After submitting a registrations, the user is shown a summary registration card
+The registration summary page displays the voter's new voter card, as and contains a button that redirects back to the starting page.
 
 ```
 search @session @browser
-  [#app-window target:"Submission" voter]
-  window = [#div class:"app-window"]
+  [#app-window target: "Submission" voter]
+  window = [#div class: "app-window"]
   
 bind @browser
   window.children += [#div children:
     [#h1 text: "Registration Summary"]
     [#voter-card voter]
-    [#button target:"Start" class:"submit-btn" text:"Finish"]]
+    [#button target: "Start" class: "submit-btn" text: "Finish"]]
 ```
 
 
@@ -238,7 +237,7 @@ commit
 
 ### Summary Page
 
-This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a #`voter-card` for each #`voter` record. The layout for what the #`voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
+This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a `#voter-card` for each `#voter` record. The layout for what the `#voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
 
 ```eve
 search @session @browser
@@ -252,7 +251,7 @@ bind @browser
 
 ### Voter Cards
 
-Each voter gets a #`voter-card` in the browser, and this block inject that with all of its content. It's worth noting again how verbose this section is, since each question on the registration form requires its own line in the search block. Originally I had intended to capture first name, middle name, and last name separately, as well as the street number, city, and zip code for address, but all of those different fields added up quickly and I was staring down the barrel of a 20-line search block. There are more complicated methods to deal with complex situations like that, and we'll have another example to show off functionality (perhaps an expanded version of this app), but for now, long-winded specificity is the cleanest way to achieve the goals of this example.
+Each voter gets a `#voter-card` in the browser, which displays the voter's information.
 
 ```
 search @session @browser
@@ -272,14 +271,13 @@ bind @browser
       [#div class:"voter-phone" text:phone]
       [#div class:"voter-ssn" text:"SSN: XXX-XX-{{ssn}}"]]
     [#div class:"voter-party" text:"Affiliation: {{party}}"]]
-  
 ```
 
 ## Appendix
 
 ### Sample Data
 
-Here's a few registered voters to help populate the Summary page.
+Here's a few sample registered voters to help populate the Summary page.
 
 ```eve
 commit
@@ -427,35 +425,13 @@ bind @browser
   form.children += [#button #submit form sort: 100 text: "Submit"]
 ```
 
-Forms can have an optional reset button, which clears the fields in the form
-
-```
-search @browser
-  form = [#form options: [reset: true]]
-  
-bind @browser
-  form.children += [#button #reset form sort: 101 text: "Reset"]
-```
-
-Clicking the reset button clears each field in the form
-
-```eve
-search @event @browser
-  [#click element: [#reset]]
-  field-container = [#div field form]
-    
-commit @browser
-  field-container.children.value := none
-```
-
-
 **Handle form submission**
 
-When the submit button is clicked, the form enters a #validating stage, where all form data are collected and compared against the field specifications. If any field does not matched, then the form is tagged #invalid and those fields are called out to the user for correction.
+When the submit button is clicked, the form enters a #validating stage, where all form data are collected and compared against the field specifications. If any field does not match, then the submission is tagged #invalid and those fields are called out to the user to correct.
 
-If all fields are valid, then the form is marked #valid and the data are stored in the submission attribute of the #form record.
+If all fields are valid, then the submission is marked #valid and the data are stored in a new `#submission` record stamped with the submission time.
 
-We start by saving the data in the submission record, and mark the #form as #validating. Validation is covered in the next section.
+We start by saving the data in the submission record, and mark the submission as `#validating`. Validation is covered in the next section.
 
 ```
 search @event @browser @session
@@ -473,7 +449,7 @@ commit @browser
 
 **Handle form validation**
 
-If a field is #required and a form is #validating, then we check that the field is actually filled. If it is not, then we mark the field with a class that calls this to the user's attention.
+If a field is `#required` and a submission` is `#validating`, then we check that the field is actually filled. If any required fields are not filled, then we mark the submission as `#invalid`.
 
 ```
 search @browser
@@ -483,10 +459,9 @@ search @browser
 commit @browser
   submission -= #validating
   submission += #invalid
-
 ```
 
-Give invalid fields a custom class. Also display a message at the top if any fields are required but missing
+Give invalid fields a custom class. Also display a message at the top if any fields are required but missing. The bind here allows the form to be corrected dynamically, unmarking previously invalid fields as soon as they are filled.
 
 ```
 search @browser
@@ -500,7 +475,7 @@ bind @browser
   form-message.children += [#div class: "error-message" text: "Please fill out all required fields"]
 ```
 
-If all required fields are valid, then the form is marked #valid
+If all required fields are valid, then the submission is marked `#valid`
 
 ```
 search @browser
@@ -514,6 +489,8 @@ commit @browser
 
 **Reset the form**
 
+Resetting currently has a bug that affects multiple form submissions in succession.
+
 ```
 search @browser
   form = [#form #reset]
@@ -525,6 +502,8 @@ commit @browser
 ```
 
 **Custom Input Types**
+
+Custom input types are implemented by taking the value of the input (whatever that may be) and assigning it to the value attribute of its corresponding `#field` record. For example, the value of a text field is just `value`. However, the value of a radio field is the `value` of the option that is checked, so some additional logic needs to be in place to work with these various components. However, the interface to access these data from Eve is to uniformly look at the `value` on the `#field`. In this example, we implement both the radio and the input fields, but more can be implemented in this way.
 
 Render radio buttons
 
@@ -541,7 +520,7 @@ bind @browser
       [#input class: "radio-button" field form type: "radio" name: field.field value: field.options.label]]]
 ```
 
-Save radio value in its respective #field
+Save radio value in its respective `#field`
 
 ```
 search @browser @session
@@ -552,17 +531,6 @@ bind @browser
   field.value := value
 
 ```
-
-
-```eve disabled
-search @browser
-  field = [#field value]
-  
-bind @browser
-  [#div text: "{{field.field}} {{field.value}}"]
-```
-
-
 
 Render input fields
 
@@ -579,7 +547,7 @@ bind @browser
     [#input class: "text-input" type: "input" form field name: field.field placeholder]]
 ```
 
-Save input value to respective #field
+Save input value to respective `#field`
 
 ```
 
@@ -705,7 +673,6 @@ This app needs a good amount of CSS to style the layout of the registration form
   text-transform: uppercase;
   cursor: pointer;
 }
-
 
 .sponsor {
   background: url(http://i.imgur.com/sWkxxNU.png) no-repeat;
@@ -882,8 +849,6 @@ This app needs a good amount of CSS to style the layout of the registration form
   margin-right: 0px;
   padding-left: 0px;
 }
-
-
   
 .radio-field input {
   margin-left: 6px;  
