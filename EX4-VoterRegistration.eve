@@ -109,7 +109,7 @@ search @session @browser
   window = [#div class:"app-window"]
   [#party party-name priority]
   [#gender gender-name order]
-  registration-form = [#form #valid name: "Voter Registration"]
+  registration-form = [#form #qualified name: "Voter Registration"]
   
 bind @browser
   registration-form.sections += (
@@ -144,8 +144,8 @@ search @browser @session
   form = [#form name: "Voter Registration" submission: [citizenship felony]]
   not(form = [#qualified])
   
-  citizenship != "Yes"
-  felony != "No"
+  disqualified = if citizenship != "Yes" then "disqualified"
+                 else if felony != "No" then "disqualified"
 
   form-message = [#form-message form]
   
