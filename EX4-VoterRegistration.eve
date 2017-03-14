@@ -54,7 +54,7 @@ This commits a record called #`app-window` whose attribute `target` specifies wh
 
 ```
 commit
-  [#app-window target:"Start"]
+  [#app-window target: "Register"]
 
 ```
 ## Start Page
@@ -84,7 +84,7 @@ Holy text wall Batman. So it turns out the voter registration page is a little v
 search @session @browser
   [#app-window target:"Register"]
   window = [#div class:"app-window"]
-  [#party party-name priority]
+ 
   [#gender gender-name order]
 
 bind @browser
@@ -98,8 +98,21 @@ bind @browser
         [label: "No"]]
       [#field #required sort: 2 type: "radio" label: "Have you been convicted of a felony?" field: "felony" options: 
         [label: "Yes"]
-        [label: "No"]]]
+        [label: "No"]]]]]
+```
+
+Reveal the rest of the registration form only if the qualifications are met.Voters can only register if they are both citizens, and they don't have a felony conviction.
+
+```
+search @session @browser
+  [#app-window target:"Register"]
+  window = [#div class:"app-window"]
+  [#party party-name priority]
+  [#gender gender-name order]
+  registration-form = [#form #valid name: "Voter Registration"]
   
+bind @browser
+  registration-form.sections += (
   [#section sort: 2 name: "Personal Information" fields:
     [#field #required sort: 1 type: "input" label: "First Name" field: "first-name"]
     [#field sort: 2 type: "input" label: "Middle Name" field: "middle-name"]
@@ -118,15 +131,41 @@ bind @browser
     [#field #required sort: 4 type: "input" label: "State" field: "state"]
     [#field #required sort: 5 type: "input" label: "Zip" field: "zip"]
   ]
-  
+
   [#section sort: 4 name: "Political Affiliation" fields: 
     [#field #required sort: 1 type: "radio" label: "Of which party are you a member?" field: "party" options:
-    [label: party-name]
-  ]
+    [label: party-name]]])
+```
+
+If either of the qualifications are not met, then a message is displayed informing the registrant of this.
+
+```
+search @browser @session
+  form = [#form name: "Voter Registration" submission: [citizenship felony]]
+  not(form = [#qualified])
   
-  ]
-          
-]]
+  citizenship != "Yes"
+  felony != "No"
+
+  form-message = [#form-message form]
+  
+commit @browser
+  form-message.children += [#div class: "error-message" text: "Sorry, you are not qualified to register to vote"]
+```
+
+
+The form is marked #qualified if the qualifications are met
+
+```
+search @browser @session
+  form = [#form name: "Voter Registration" submission: [citizenship felony]]
+  not(form = [#qualified])
+  
+  citizenship = "Yes"
+  felony = "No"
+  
+commit @browser
+  form += #qualified
 ```
 
 This listens for a new submission on the registration form, and creates a new #voter record with the submitted information.
@@ -134,15 +173,12 @@ This listens for a new submission on the registration form, and creates a new #v
 ```
 search @browser @session
   window = [#app-window]
-  [#form name: "Voter Registration" submission: s]
+  [#form #qualified name: "Voter Registration" submission: s]
   
   middle-name  = if s.middle-name then s.middle-name else ""
   phone  = if sphone then s.phone else ""
   address2 = if s.address2 then s.address2 else ""
          
-  s.citizenship = "Yes"
-  s.felony = "No"
-
 commit
   window.target := "Submission"
   window.voter := voter
