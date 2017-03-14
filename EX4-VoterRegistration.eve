@@ -198,7 +198,7 @@ bind @browser
   window.children += [#div children:
     [#h1 text: "Registration Summary"]
     [#voter-card voter]
-    [#button target:"Register" class:"begin-btn" text:"Begin a new registration"]]
+    [#button target:"Start" class:"submit-btn" text:"Finish"]]
 ```
 
 
