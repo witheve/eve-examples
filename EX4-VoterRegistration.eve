@@ -103,7 +103,7 @@ bind @browser
 
 Reveal the rest of the registration form only if the qualifications are met.Voters can only register if they are both citizens, and they don't have a felony conviction.
 
-```
+```eve
 search @session @browser
   [#app-window target:"Register"]
   window = [#div class:"app-window"]
@@ -137,11 +137,12 @@ bind @browser
     [label: party-name]]])
 ```
 
-If either of the qualifications are not met, then a message is displayed informing the registrant of this.
+If either of the qualifications are not met, then a message is displayed informing the registrant.
 
 ```
 search @browser @session
-  form = [#form name: "Voter Registration" submission: [citizenship felony]]
+  [#submission #valid form citizenship felony]
+  form = [#form name: "Voter Registration"]
   not(form = [#qualified])
   
   disqualified = if citizenship != "Yes" then "disqualified"
@@ -149,7 +150,7 @@ search @browser @session
 
   form-message = [#form-message form]
   
-commit @browser
+bind @browser
   form-message.children += [#div class: "error-message" text: "Sorry, you are not qualified to register to vote"]
 ```
 
@@ -158,7 +159,8 @@ The form is marked #qualified if the qualifications are met
 
 ```
 search @browser @session
-  form = [#form name: "Voter Registration" submission: [citizenship felony]]
+  [#submission #valid form citizenship felony]
+  form = [#form name: "Voter Registration"]
   not(form = [#qualified])
   
   citizenship = "Yes"
@@ -170,33 +172,18 @@ commit @browser
 
 This listens for a new submission on the registration form, and creates a new #voter record with the submitted information.
 
-```
+```eve
 search @browser @session
+  form = [#form #qualified]
+  submission = [#valid form first-name middle-name last-name birthday gender phone ssn address1 address2 city state zip party]
   window = [#app-window]
-  [#form #qualified name: "Voter Registration" submission: s]
-  
-  middle-name  = if s.middle-name then s.middle-name else ""
-  phone  = if sphone then s.phone else ""
-  address2 = if s.address2 then s.address2 else ""
-         
+
 commit
+  form -= #qualified
+  submission := none
   window.target := "Submission"
   window.voter := voter
-  voter = [#voter 
-    first-name: s.first-name 
-    middle-name 
-    last-name: s.last-name
-    birthday: s.birthday
-    ssn: s.ssn
-    phone
-    gender: s.gender 
-    party: s.party
-   address: [
-    address1: s.address1 
-    address2 
-    city: s.city
-    state: s.state
-    zip: s.zip]]
+  voter = [#voter first-name middle-name last-name birthday ssn phone gender party address: [address1 address2 city state zip]]
 ```
 
 After submitting a registrations, the user is shown a summary registration card
@@ -207,7 +194,10 @@ search @session @browser
   window = [#div class:"app-window"]
   
 bind @browser
-  window.children += [#voter-card voter]
+  window.children += [#div children:
+    [#h1 text: "Registration Summary"]
+    [#voter-card voter]
+    [#button target:"Register" class:"begin-btn" text:"Begin a new registration"]]
 ```
 
 
@@ -245,13 +235,7 @@ commit
   [#party party-name:"No Party" priority:14]
 ```
 
-### Committing a New Voter Record
-
-
-
-
-
-Summary Page
+### Summary Page
 
 This page gives an administrator an overview of all the Earthicans who have registered to vote, and drawing the contents is actually pretty easy. All we need is a #`voter-card` for each #`voter` record. The layout for what the #`voter-card` looks like gets handled in the next block, and the brunt of the work for this section is actually the styling.
 
@@ -428,6 +412,7 @@ search @browser
   field = section.fields
   
 bind @browser
+  field.form := section.form
   section-display.children += 
     [#div #field field sort: field.sort form: section.form sort: 1]
 ```
@@ -444,7 +429,7 @@ bind @browser
 
 Forms can have an optional reset button, which clears the fields in the form
 
-```eve
+```
 search @browser
   form = [#form options: [reset: true]]
   
@@ -463,68 +448,72 @@ commit @browser
   field-container.children.value := none
 ```
 
-Handle form validation
 
-Add the #required tag to required input fields
+**Handle form submission**
 
-```eve
-search @browser
-  field = [#field #required]
-  input = [#input not(#required) field type: "input"]
+When the submit button is clicked, the form enters a #validating stage, where all form data are collected and compared against the field specifications. If any field does not matched, then the form is tagged #invalid and those fields are called out to the user for correction.
+
+If all fields are valid, then the form is marked #valid and the data are stored in the submission attribute of the #form record.
+
+We start by saving the data in the submission record, and mark the #form as #validating. Validation is covered in the next section.
+
+```
+search @event @browser @session
+  [#click element: [#submit form]]
+  [#field form field]
+  [#time timestamp: time]
+  
+  value = if field.value then field.value
+          else ""
   
 commit @browser
-  input += #required
+  submission = [#submission #validating form time]
+  lookup[record: submission, attribute: field.field value]
 ```
 
-Add required tag to radio fields
+**Handle form validation**
+
+If a field is #required and a form is #validating, then we check that the field is actually filled. If it is not, then we mark the field with a class that calls this to the user's attention.
 
 ```
 search @browser
-  field = [#field #required]
-  input = [#radio not(#required) field]
+  submission = [#submission #validating form]
+  field = [#field #required form not(value)]
   
 commit @browser
-  input += #required  
-```
-
-If an input is #required, but has no value, then post a message stating to fill in all required fields.
+  submission -= #validating
+  submission += #invalid
 
 ```
-search @browser @event
-  [#click element: [#button #submit form]]
-  required-fields = [#input #required type: "input" field]
-  not(required-fields.value)
+
+Give invalid fields a custom class. Also display a message at the top if any fields are required but missing
+
+```
+search @browser
+  [#submission #invalid form]
+  field = [#field #required form not(value)]
   field-label = [#h3 field]
-  
-commit @browser
-  field-label.class += "required-field"
-```
-
-Do the same for radio buttons
-
-```eve
-search @browser @event
-  [#click element: [#button #submit form]]
-  required-fields = [#radio #required field]
-  not(required-fields.value)
-  field-label = [#h3 field]
-  
-commit @browser
-  field-label.class += "required-field"
-```
-
-Display a message at the top if any fields are required but missing
-
-```
-search @browser
-  [#h3 class: "required-field"]
   form-message = [#form-message form]
   
 bind @browser
+  field-label.class += "required-field"
   form-message.children += [#div class: "error-message" text: "Please fill out all required fields"]
 ```
 
-Custom Input Types
+If all required fields are valid, then the form is marked #valid
+
+```
+search @browser
+  submission = [#submission #validating form]
+  not([#field #required form not(value)])
+
+commit @browser
+  submission -= #validating
+  submission += #valid
+```
+
+
+**Custom Input Types**
 
 Render radio buttons
 
@@ -538,32 +527,31 @@ bind @browser
     [#h3 field text: field.label]
     [#div option: field.options children: 
       [#div class: "radio-label" text: field.options.label]
-      [#input class: "radio-button" field form type: "radio" name: field.field value: field.options.label]]
-  ]
+      [#input class: "radio-button" field form type: "radio" name: field.field value: field.options.label]]]
 ```
 
-Bind the clicked value to the radio div
+Save radio value in its respective #field
 
 ```
+search @browser @session
+  radio = [#input type: "radio" checked: true field value]
+  field = [#field]
+  
+bind @browser
+  field.value := value
+
+```
+
+
+```eve disabled
 search @browser
-  [#input type: "radio" checked: true field value]
-  radio-div = [#div #radio field]
+  field = [#field value]
   
 bind @browser
-  radio-div.value := value
+  [#div text: "{{field.field}} {{field.value}}"]
 ```
 
-Submit radio options
 
-```
-search @browser @event @session
-  click = [#click element: [#submit form]]
-  form = [#form submission]
-  radio = [#input form type: "radio" checked: true name: key value]
-  
-bind @browser
-  lookup[record: submission, attribute: key, value]
-```
 
 Render input fields
 
@@ -577,20 +565,19 @@ search @browser
 bind @browser
   field-display.children += [#div children: 
     [#h3 field text: field.label]
-    [#input class: "text-input" type: "input" form field name: field.field placeholder]
-  ]
+    [#input class: "text-input" type: "input" form field name: field.field placeholder]]
 ```
 
-Submit input value
+Save input value to respective #field
 
 ```
-search @browser @event @session
-  click = [#click element: [#submit form]]
-  form = [#form submission]
-  input = [#input type: "input" form field name: key value]
 
+search @browser @session
+  input = [#input type: "input" field value]
+  field = [#field]
+  
 bind @browser
-  lookup[record: submission, attribute: key, value]
+  field.value := value
 ```
 
 Render password fields
@@ -612,7 +599,7 @@ search @browser
   button = [#button]
   
 bind @browser
-  button.class += "button"
+  button.class += "form-button"
 ```
 
 ### Styles
@@ -673,6 +660,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   border-radius: 5px;
   background: none;
   font-size: 14px;
+  cursor: pointer;
 }
 
 .app-window.home-screen {
@@ -704,6 +692,7 @@ This app needs a good amount of CSS to style the layout of the registration form
   border: 1px solid #555;
   border-radius: 6px;
   text-transform: uppercase;
+  cursor: pointer;
 }
 
 
