@@ -621,7 +621,7 @@ This app needs a good amount of CSS to style the layout of the registration form
 ```css
 @font-face {
   font-family: "futurama";
-  src: url("https://witheve.github.io/assets/fonts/fr-bold.ttf") format("truetype");
+  src: url("assets/fr-bold.ttf") format("truetype");
 }
 
 .nav-bar {
