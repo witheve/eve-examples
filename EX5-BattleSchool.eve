@@ -318,11 +318,11 @@ There's a lot of CSS this time around because of a greater need for media querie
 ### Broadcast Page
 ```css
 .broadcast {
+  height: 100%;
   background: #333;
   display: flex;
   flex-direction: column;
   overflow: scroll;
-  pointer-events: none;
   user-select: none;
 }
 
@@ -508,10 +508,11 @@ There's a lot of CSS this time around because of a greater need for media querie
 .broadcast {
   width: 100%;
   max-width: 550px;
+  overflow: scroll;
 }
 
 .battle-room {
-  flex: 1 0 80px;
+  flex: 1 0 55px;
 }
 
 .room-title {
